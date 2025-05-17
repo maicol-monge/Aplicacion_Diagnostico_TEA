@@ -3,6 +3,11 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 import { useNavigate, useLocation } from 'react-router-dom';
 
+const COLOR_BG = "#a8dadc";
+const COLOR_PRIMARY = "#457b9d";
+const COLOR_DARK = "#1d3557";
+const COLOR_ACCENT = "#f3859e";
+
 const EstablecerContra = () => {
     const [nuevaContra, setNuevaContra] = useState('');
     const [confirmarContra, setConfirmarContra] = useState('');
@@ -78,85 +83,114 @@ const EstablecerContra = () => {
     }
 
     return (
-        <div className="container py-5">
-            <div className="row justify-content-center">
-                <div className="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5">
-                    <div className="card shadow">
-                        <div className="card-header bg-primary text-white text-center">
-                            <h4 className="mb-0">Establecer Nueva Contraseña</h4>
-                        </div>
-                        <div className="card-body">
-                            <form onSubmit={handleSubmit}>
-                                <div className="mb-3">
-                                    <label className="form-label">Nueva contraseña</label>
-                                    <div className="input-group">
-                                        <input
-                                            type={showNueva ? "text" : "password"}
-                                            className="form-control"
-                                            value={nuevaContra}
-                                            onChange={e => setNuevaContra(e.target.value)}
-                                            required
-                                        />
-                                        <button
-                                            type="button"
-                                            className="btn btn-outline-secondary"
-                                            tabIndex={-1}
-                                            onClick={() => setShowNueva(!showNueva)}
-                                        >
-                                            {showNueva ? (
-                                                <i className="bi bi-eye-slash-fill"></i>
-                                            ) : (
-                                                <i className="bi bi-eye-fill"></i>
-                                            )}
-                                        </button>
-                                    </div>
-                                    <div className="form-text">
-                                        Mínimo 8 caracteres, una mayúscula, un número y un carácter especial.
-                                    </div>
-                                </div>
-                                <div className="mb-3">
-                                    <label className="form-label">Confirmar contraseña</label>
-                                    <div className="input-group">
-                                        <input
-                                            type={showConfirmar ? "text" : "password"}
-                                            className="form-control"
-                                            value={confirmarContra}
-                                            onChange={e => setConfirmarContra(e.target.value)}
-                                            required
-                                        />
-                                        <button
-                                            type="button"
-                                            className="btn btn-outline-secondary"
-                                            tabIndex={-1}
-                                            onClick={() => setShowConfirmar(!showConfirmar)}
-                                        >
-                                            {showConfirmar ? (
-                                                <i className="bi bi-eye-slash-fill"></i>
-                                            ) : (
-                                                <i className="bi bi-eye-fill"></i>
-                                            )}
-                                        </button>
-                                    </div>
-                                </div>
-                                <div className="d-grid gap-2">
-                                    <button
-                                        type="submit"
-                                        className="btn btn-primary"
-                                        disabled={loading}
-                                    >
-                                        Guardar nueva contraseña
-                                    </button>
+        <div
+            className="min-vh-100 d-flex align-items-center justify-content-center"
+            style={{ background: COLOR_BG, minHeight: "100vh" }}
+        >
+            <div className="col-12 col-sm-10 col-md-8 col-lg-5 col-xl-4">
+                <div
+                    className="card shadow m-3"
+                    style={{
+                        borderTop: `6px solid ${COLOR_ACCENT}`,
+                        borderRadius: 18,
+                        background: "#fff"
+                    }}
+                >
+                    <div
+                        className="card-header text-white text-center"
+                        style={{
+                            background: COLOR_PRIMARY,
+                            borderTopLeftRadius: 18,
+                            borderTopRightRadius: 18
+                        }}
+                    >
+                        <h4 className="mb-0" style={{ color: "#fff" }}>Establecer Nueva Contraseña</h4>
+                    </div>
+                    <div className="card-body">
+                        <form onSubmit={handleSubmit}>
+                            <div className="mb-3">
+                                <label className="form-label" style={{ color: COLOR_DARK }}>Nueva contraseña</label>
+                                <div className="input-group">
+                                    <input
+                                        type={showNueva ? "text" : "password"}
+                                        className="form-control"
+                                        value={nuevaContra}
+                                        onChange={e => setNuevaContra(e.target.value)}
+                                        required
+                                        style={{ borderRight: 0 }}
+                                    />
                                     <button
                                         type="button"
-                                        className="btn btn-secondary"
-                                        onClick={() => navigate('/')}
-                                        disabled={loading}
+                                        className="btn btn-outline-secondary"
+                                        tabIndex={-1}
+                                        onClick={() => setShowNueva(!showNueva)}
+                                        style={{ borderLeft: 0 }}
                                     >
-                                        Cancelar
+                                        {showNueva ? (
+                                            <i className="bi bi-eye-slash-fill"></i>
+                                        ) : (
+                                            <i className="bi bi-eye-fill"></i>
+                                        )}
                                     </button>
                                 </div>
-                            </form>
-                        </div>
+                                <div className="form-text" style={{ color: COLOR_PRIMARY }}>
+                                    Mínimo 8 caracteres, una mayúscula, un número y un carácter especial.
+                                </div>
+                            </div>
+                            <div className="mb-3">
+                                <label className="form-label" style={{ color: COLOR_DARK }}>Confirmar contraseña</label>
+                                <div className="input-group">
+                                    <input
+                                        type={showConfirmar ? "text" : "password"}
+                                        className="form-control"
+                                        value={confirmarContra}
+                                        onChange={e => setConfirmarContra(e.target.value)}
+                                        required
+                                        style={{ borderRight: 0 }}
+                                    />
+                                    <button
+                                        type="button"
+                                        className="btn btn-outline-secondary"
+                                        tabIndex={-1}
+                                        onClick={() => setShowConfirmar(!showConfirmar)}
+                                        style={{ borderLeft: 0 }}
+                                    >
+                                        {showConfirmar ? (
+                                            <i className="bi bi-eye-slash-fill"></i>
+                                        ) : (
+                                            <i className="bi bi-eye-fill"></i>
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="d-grid gap-2">
+                                <button
+                                    type="submit"
+                                    className="btn"
+                                    style={{
+                                        background: COLOR_PRIMARY,
+                                        color: "#fff",
+                                        fontWeight: "bold"
+                                    }}
+                                    disabled={loading}
+                                >
+                                    Guardar nueva contraseña
+                                </button>
+                                <button
+                                    type="button"
+                                    className="btn"
+                                    style={{
+                                        background: COLOR_ACCENT,
+                                        color: "#fff",
+                                        fontWeight: "bold"
+                                    }}
+                                    onClick={() => navigate('/')}
+                                    disabled={loading}
+                                >
+                                    Cancelar
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
