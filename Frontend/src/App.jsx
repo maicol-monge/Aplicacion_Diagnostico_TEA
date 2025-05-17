@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import LoginPage from "./pages/Login/LoginPage";
 import Home_Espe from "./Especialista/home_espe";
 import Home_Paciente from "./Paciente/home_paciente";
-import Registrar from "./pages/Registrar/Registrar"
+import Registrar from "./Especialista/Registrar"
 import EstablecerContra from "./pages/Login/EstablecerContra";
 
 

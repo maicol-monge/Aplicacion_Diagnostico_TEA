@@ -2,10 +2,16 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
-// Instala supabase-js: npm install @supabase/supabase-js
 import { createClient } from '@supabase/supabase-js';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 
-// Configura tus credenciales de Supabase
+// Colores de la paleta
+const COLOR_BG = "#a8dadc";
+const COLOR_PRIMARY = "#457b9d";
+const COLOR_DARK = "#1d3557";
+const COLOR_ACCENT = "#f3859e";
+
 const supabaseUrl = 'https://xbfnefyndfqlspnyexsh.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhiZm5lZnluZGZxbHNwbnlleHNoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM1MzI5OTQsImV4cCI6MjA1OTEwODk5NH0._NtmGEdvH-7EltxTvGJjWYWrX7gpJ_x469h2cv4TjBU';
 const supabase = createClient(supabaseUrl, supabaseKey);
@@ -51,7 +57,6 @@ const Registrar = () => {
     };
 
     const validateEmail = (email) => {
-        // Expresión regular simple para validar email
         const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return regex.test(email);
     };
@@ -84,7 +89,7 @@ const Registrar = () => {
         if (![0, 1].includes(Number(formData.privilegio))) {
             Swal.fire({
                 title: 'Error',
-                text: 'Privilegio no válido. Debe ser 0 (Estudiante) o 1 (Docente).',
+                text: 'Privilegio no válido. Debe ser 0 (Especialista) o 1 (Paciente).',
                 icon: 'error',
                 confirmButtonText: 'Aceptar',
             });
@@ -109,7 +114,6 @@ const Registrar = () => {
                 return;
             }
 
-            // Obtén la URL pública
             const { data: publicUrlData } = supabase
                 .storage
                 .from('tea')
@@ -151,17 +155,38 @@ const Registrar = () => {
     };
 
     return (
-        <div className="container py-5">
+        <div
+            className="min-vh-100"
+            style={{
+                background: COLOR_BG,
+                minHeight: "100vh",
+            }}
+        >
+            <Navbar />
             <div className="row justify-content-center">
                 <div className="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5">
-                    <div className="card shadow">
-                        <div className="card-header bg-primary text-white text-center">
-                            <h3 className="mb-0">Registrar Usuario</h3>
+                    <div
+                        className="card shadow m-3"
+                        style={{
+                            borderTop: `6px solid ${COLOR_ACCENT}`,
+                            borderRadius: 18,
+                            background: "#fff"
+                        }}
+                    >
+                        <div
+                            className="card-header text-white text-center"
+                            style={{
+                                background: COLOR_PRIMARY,
+                                borderTopLeftRadius: 18,
+                                borderTopRightRadius: 18
+                            }}
+                        >
+                            <h3 className="mb-0" style={{ color: "#fff" }}>Registrar Usuario</h3>
                         </div>
                         <div className="card-body">
                             <form onSubmit={handleSubmit}>
                                 <div className="mb-3">
-                                    <label className="form-label">Nombres:</label>
+                                    <label className="form-label" style={{ color: COLOR_DARK }}>Nombres:</label>
                                     <input
                                         type="text"
                                         name="nombres"
@@ -172,7 +197,7 @@ const Registrar = () => {
                                     />
                                 </div>
                                 <div className="mb-3">
-                                    <label className="form-label">Apellidos:</label>
+                                    <label className="form-label" style={{ color: COLOR_DARK }}>Apellidos:</label>
                                     <input
                                         type="text"
                                         name="apellidos"
@@ -183,7 +208,7 @@ const Registrar = () => {
                                     />
                                 </div>
                                 <div className="mb-3">
-                                    <label className="form-label">Dirección:</label>
+                                    <label className="form-label" style={{ color: COLOR_DARK }}>Dirección:</label>
                                     <input
                                         type="text"
                                         name="direccion"
@@ -194,7 +219,7 @@ const Registrar = () => {
                                     />
                                 </div>
                                 <div className="mb-3">
-                                    <label className="form-label">Teléfono:</label>
+                                    <label className="form-label" style={{ color: COLOR_DARK }}>Teléfono:</label>
                                     <input
                                         type="text"
                                         name="telefono"
@@ -205,7 +230,7 @@ const Registrar = () => {
                                     />
                                 </div>
                                 <div className="mb-3">
-                                    <label className="form-label">Correo:</label>
+                                    <label className="form-label" style={{ color: COLOR_DARK }}>Correo:</label>
                                     <input
                                         type="email"
                                         name="correo"
@@ -216,7 +241,7 @@ const Registrar = () => {
                                     />
                                 </div>
                                 <div className="mb-3">
-                                    <label className="form-label">Tipo de Usuario:</label>
+                                    <label className="form-label" style={{ color: COLOR_DARK }}>Tipo de Usuario:</label>
                                     <select
                                         name="privilegio"
                                         className="form-select"
@@ -230,7 +255,7 @@ const Registrar = () => {
                                     </select>
                                 </div>
                                 <div className="mb-3">
-                                    <label className="form-label">Imagen (opcional):</label>
+                                    <label className="form-label" style={{ color: COLOR_DARK }}>Foto de Perfil (opcional):</label>
                                     <input
                                         type="file"
                                         accept="image/png, image/jpeg"
@@ -241,14 +266,24 @@ const Registrar = () => {
                                 <div className="d-grid gap-2">
                                     <button
                                         type="submit"
-                                        className="btn btn-primary"
+                                        className="btn"
+                                        style={{
+                                            background: COLOR_PRIMARY,
+                                            color: "#fff",
+                                            fontWeight: "bold"
+                                        }}
                                         disabled={!camposRequeridosLlenos()}
                                     >
                                         Registrar
                                     </button>
                                     <button
                                         type="button"
-                                        className="btn btn-secondary"
+                                        className="btn"
+                                        style={{
+                                            background: COLOR_ACCENT,
+                                            color: "#fff",
+                                            fontWeight: "bold"
+                                        }}
                                         onClick={() => navigate('/')}
                                     >
                                         Cancelar
@@ -259,6 +294,7 @@ const Registrar = () => {
                     </div>
                 </div>
             </div>
+            <Footer />
         </div>
     );
 };
