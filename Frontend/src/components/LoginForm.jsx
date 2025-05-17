@@ -1,8 +1,6 @@
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-
-
 import Swal from "sweetalert2";
 
 const LoginForm = () => {
@@ -16,13 +14,39 @@ const LoginForm = () => {
             axios
                 .post("http://localhost:5000/api/users/login", { correo: email, contrasena: password })
                 .then((response) => {
-                    console.log("Respuesta del backend:", response.data); // Verifica la respuesta aquí
-                    const { id_usuario, nombre, correo } = response.data.user;
-                    localStorage.setItem("user", JSON.stringify({ id_usuario, nombre, correo })); // Guardar en localStorage
-                    navigate("/home");
+                    const data = response.data;
+                    // Si requiere cambio de contraseña, redirige a establecer contraseña
+                    if (data.requirePasswordChange) {
+                        Swal.fire({
+                            title: "¡Bienvenido!",
+                            text: "Por seguridad, debes establecer una nueva contraseña.",
+                            icon: "info",
+                            confirmButtonText: "Continuar"
+                        }).then(() => {
+                            navigate("/establecer-contra", {
+                                state: {
+                                    id_usuario: data.user.id_usuario,
+                                    correo: data.user.correo
+                                }
+                            });
+                        });
+                        return;
+                    }
+                    // Login normal
+                    const { id_usuario, nombres, apellidos, correo, privilegio, imagen } = data.user;
+                    localStorage.setItem("user", JSON.stringify({ id_usuario, nombres, apellidos, correo, privilegio, imagen }));
+                    console.log("Usuario logueado:", data.user);
+                    if (privilegio === 0) {
+                        navigate("/home_espe");
+                    } else if (privilegio === 1) {
+                        navigate("/home_paciente");
+                    }
+                    else {
+                        navigate("/");
+                    }
+                    
                 })
                 .catch((error) => {
-                    console.error("Error al iniciar sesión:", error);
                     Swal.fire({
                         title: "Error",
                         text: "Usuario o contraseña incorrectos",

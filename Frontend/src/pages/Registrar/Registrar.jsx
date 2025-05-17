@@ -64,7 +64,6 @@ const Registrar = () => {
             formData.telefono.trim() !== '' &&
             formData.correo.trim() !== '' &&
             validateEmail(formData.correo) &&
-            formData.contrasena.trim() !== '' &&
             formData.privilegio !== ''
         );
     };
@@ -76,16 +75,6 @@ const Registrar = () => {
             Swal.fire({
                 title: 'Error',
                 text: 'Por favor ingrese un correo electrónico válido.',
-                icon: 'error',
-                confirmButtonText: 'Aceptar',
-            });
-            return;
-        }
-
-        if (!validatePassword(formData.contrasena)) {
-            Swal.fire({
-                title: 'Error',
-                text: 'La contraseña debe tener al menos 8 caracteres, una mayúscula, un número y un carácter especial.',
                 icon: 'error',
                 confirmButtonText: 'Aceptar',
             });
@@ -162,12 +151,12 @@ const Registrar = () => {
     };
 
     return (
-        <div className="container mt-5">
+        <div className="container py-5">
             <div className="row justify-content-center">
-                <div className="col-md-8">
+                <div className="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5">
                     <div className="card shadow">
                         <div className="card-header bg-primary text-white text-center">
-                            <h3>Registrar Usuario</h3>
+                            <h3 className="mb-0">Registrar Usuario</h3>
                         </div>
                         <div className="card-body">
                             <form onSubmit={handleSubmit}>
@@ -227,7 +216,7 @@ const Registrar = () => {
                                     />
                                 </div>
                                 <div className="mb-3">
-                                    <label className="form-label">Privilegio:</label>
+                                    <label className="form-label">Tipo de Usuario:</label>
                                     <select
                                         name="privilegio"
                                         className="form-select"
@@ -237,7 +226,7 @@ const Registrar = () => {
                                     >
                                         <option value="">Seleccione</option>
                                         <option value="0">Especialista</option>
-                                        <option value="0">Paciente</option>
+                                        <option value="1">Paciente</option>
                                     </select>
                                 </div>
                                 <div className="mb-3">

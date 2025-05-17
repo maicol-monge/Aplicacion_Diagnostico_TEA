@@ -8,7 +8,7 @@ const Home = () => {
     useEffect(() => {
         const user = JSON.parse(localStorage.getItem("user"));
         if (user) {
-            setUserName(user.nombre);
+            setUserName(user.nombres);
         } else {
             navigate("/"); // Redirige al login si no hay usuario
         }
@@ -20,6 +20,7 @@ const Home = () => {
                 APLICACIÓN PARA LA EVALUACIÓN DE PERSONAS CON TRASTORNO DEL 
                 ESPECTRO AUTISTA (TEA)
             </h1>
+            <h2>Paciente</h2>
             <h3 className="text-center text-secondary mb-5">
                 ¡Bienvenido, {userName}!
             </h3>
