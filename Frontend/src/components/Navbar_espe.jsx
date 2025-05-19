@@ -73,7 +73,22 @@ const Navbar = () => {
                             navigate("/home_espe");
                         }}
                     >
-                        Home
+                        Inicio
+                    </button>
+                    <button
+                        className="btn btn-sm"
+                        style={{
+                            background: COLOR_DARK,
+                            color: "#fff",
+                            fontWeight: "bold",
+                            marginLeft: 8
+                        }}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            navigate("/registrar");
+                        }}
+                    >
+                        Registrar Usuario
                     </button>
                 </span>
                 <div className="d-flex">
