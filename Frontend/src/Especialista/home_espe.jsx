@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Navbar from '../components/Navbar_espe';
+import Footer from '../components/Footer';
 
 const Home = () => {
     const [userName, setUserName] = useState("");
@@ -15,7 +17,8 @@ const Home = () => {
     }, [navigate]);
 
     return (
-        <div className="container mt-5">
+        <div>
+            <Navbar />
             <h1 className="text-center text-primary mb-4">
                 APLICACIÓN PARA LA EVALUACIÓN DE PERSONAS CON TRASTORNO DEL 
                 ESPECTRO AUTISTA (TEA)
@@ -27,6 +30,7 @@ const Home = () => {
             <div className="row g-4">
                 
             </div>
+            <Footer/>
         </div>
     );
 };
