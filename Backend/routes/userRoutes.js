@@ -3,7 +3,9 @@ const {
   login,
   registrar,
   cambiarContrasena,
-  listarPacientes
+  listarPacientes, 
+  cambiarPasswordConActual, 
+  recuperarContrasena
 } = require("../controllers/userController");
 const authenticateToken = require("../middlewares/auth"); // Importa el middleware
 
@@ -13,6 +15,8 @@ const router = express.Router();
 router.post("/login", login);
 router.post("/registrar",authenticateToken, registrar);
 router.post("/cambiar-contrasena", authenticateToken, cambiarContrasena);
-router.get('/pacientes', listarPacientes);
+router.get('/pacientes',authenticateToken, listarPacientes);
+router.put('/cambiar-password',authenticateToken, cambiarPasswordConActual);
+router.post("/recuperar-contrasena", recuperarContrasena);
 
 module.exports = router;

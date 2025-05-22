@@ -21,6 +21,8 @@ import CrudPreguntas from "./Admin/CrudPreguntas";
 import CrudActividades from "./Admin/CrudActividades";
 import CrudTestsAdiR from "./Admin/CrudTestsAdiR";
 import CrudTestsAdos2 from "./Admin/CrudTestsAdos2";
+import PerfilEspecialista from "./Especialista/PerfilEspecialista";
+import PerfilPaciente from "./Paciente/PerfilPaciente";
 
 function App() {
   useEffect(() => {
@@ -53,10 +55,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<LoginPage />} />
-        
-        <Route element={<ProtectedRoute allowedPrivileges={[0,1,3]} />}>
-          <Route path="/establecer-contra" element={<EstablecerContra />} />
-        </Route>
+        <Route path="/establecer-contra" element={<EstablecerContra />} />
         
         {/* Solo especialistas (privilegio 0) */}
         <Route element={<ProtectedRoute allowedPrivileges={[0]} />}>
@@ -66,12 +65,14 @@ function App() {
           <Route path="/pacientes" element={<Pacientes />} />
           <Route path="/tests-paciente/:id_paciente" element={<ListaTestsPaciente />} />
           <Route path="/resumen-adir/:id_adir" element={<ResumenADIR />} />
+          <Route path="/perfil-especialista" element={<PerfilEspecialista />} />
         </Route>
         {/* Solo pacientes (privilegio 1) */}
         <Route element={<ProtectedRoute allowedPrivileges={[1]} />}>
           <Route path="/home_paciente" element={<Home_Paciente />} />
           <Route path="/consentimiento-informado" element={<ConsentimientoInformado />} />
           <Route path="/desactivar-cuenta" element={<DesactivarCuenta />} />
+          <Route path="/perfil-paciente" element={<PerfilPaciente />} />
         </Route>
         {/* Solo admin (privilegio 3) */}
         <Route element={<ProtectedRoute allowedPrivileges={[3]} />}>
