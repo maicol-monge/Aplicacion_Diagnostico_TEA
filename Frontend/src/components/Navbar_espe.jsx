@@ -234,8 +234,10 @@ const Navbar = () => {
                                     objectFit: "cover",
                                     border: `2px solid ${COLOR_ACCENT}`,
                                     marginRight: 10,
-                                    marginLeft: 5
+                                    marginLeft: 5,
+                                    cursor: "pointer" // Para indicar que es clickeable
                                 }}
+                                onClick={() => navigate("/perfil-especialista")}
                             />
                             <button
                                 className="btn mt-2 mt-lg-0"

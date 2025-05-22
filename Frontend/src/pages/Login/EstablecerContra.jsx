@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import { useNavigate, useLocation } from 'react-router-dom';
+import logo from "../../assets/TEA logo.png"; // Ajusta la ruta si tu logo está en otra carpeta
 
 const COLOR_BG = "#a8dadc";
 const COLOR_PRIMARY = "#457b9d";
@@ -111,6 +112,12 @@ const EstablecerContra = () => {
                             borderTopRightRadius: 18
                         }}
                     >
+                        <img
+                            src={logo}
+                            alt="Logo"
+                            style={{ width: 100, height: 100, objectFit: "contain", marginBottom: 8 }}
+                            className="mb-2"
+                        />
                         <h4 className="mb-0" style={{ color: "#fff" }}>Establecer Nueva Contraseña</h4>
                     </div>
                     <div className="card-body">

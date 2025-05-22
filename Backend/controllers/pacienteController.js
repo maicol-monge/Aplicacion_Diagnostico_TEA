@@ -92,7 +92,7 @@ Gracias por su confianza.
         attachments: [
             {
                 filename: 'Consentimiento_TEA.pdf',
-                path: 'https://xbfnefyndfqlspnyexsh.supabase.co/storage/v1/object/public/tea//Consentimiento%20informado.pdf' // URL pública del PDF
+                path: 'https://xbfnefyndfqlspnyexsh.supabase.co/storage/v1/object/public/tea//Consentimiento%20informado%20(1).pdf' // URL pública del PDF
             }
         ]
     };

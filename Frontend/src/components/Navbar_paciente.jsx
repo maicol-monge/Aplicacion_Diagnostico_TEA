@@ -203,15 +203,17 @@ const Navbar = () => {
                             <img
                                 src={fotoPerfil}
                                 alt="Perfil"
-                                width="40"
-                                height="40"
+                                width="50"
+                                height="50"
                                 style={{
                                     borderRadius: "50%",
                                     objectFit: "cover",
                                     border: `2px solid ${COLOR_ACCENT}`,
                                     marginRight: 10,
-                                    marginLeft: 5
+                                    marginLeft: 5,
+                                    cursor: "pointer" // Para indicar que es clickeable
                                 }}
+                                onClick={() => navigate("/perfil-paciente")}
                             />
                             <button
                                 className="btn mt-2 mt-lg-0"
