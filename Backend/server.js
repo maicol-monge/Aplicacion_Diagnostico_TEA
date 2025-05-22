@@ -7,6 +7,7 @@ const userRoutes = require("./routes/userRoutes");
 const pacienteRoutes = require("./routes/pacienteRoutes");
 const especialistaRoutes = require("./routes/especialistaRoutes");
 const adirRoutes = require('./routes/adirRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 const app = express(); //Instancia del servidor
 app.use(cors()); //Evitar errores al consumir en React
@@ -25,6 +26,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/pacientes", pacienteRoutes);
 app.use("/api/especialistas", especialistaRoutes);
 app.use('/api/adir', adirRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Iniciar servidor
 const PORT = process.env.PORT || 5000;

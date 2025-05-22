@@ -39,10 +39,12 @@ const LoginForm = () => {
                     localStorage.setItem("token", data.token); // Guarda el token para futuras peticiones
 
                     if (privilegio === 0) {
-                        navigate("/pacientes");
+                        navigate("/home_espe");
                     } else if (privilegio === 1) {
                         navigate("/home_paciente");
-                    } else {
+                    }else if (privilegio === 3) {
+                        navigate("/admin/home"); 
+                    }else {
                         navigate("/");
                     }
                 })

@@ -1,15 +1,18 @@
-const express = require('express');
-const router = express.Router();
+const express = require("express");
 const {
     listarTestsPorPaciente,
     obtenerResumenEvaluacion,
     guardarDiagnostico,
     resumenUltimoTestPorPaciente
-} = require('../controllers/adirController');
+} = require("../controllers/adirController");
+const authenticateToken = require("../middlewares/auth"); // Usa el mismo middleware que en pacienteRoutes.js
 
-router.get('/paciente/:id_paciente', listarTestsPorPaciente);
-router.get('/:id_adir', obtenerResumenEvaluacion);
-router.put('/:id_adir/diagnostico', guardarDiagnostico);
-router.get('/resumen-ultimo/:id_paciente', resumenUltimoTestPorPaciente);
+const router = express.Router();
+
+// Aplica autenticación JWT a todas las rutas
+router.get("/listar/:id_paciente", authenticateToken, listarTestsPorPaciente);
+router.get("/resumen/:id_adir", authenticateToken, obtenerResumenEvaluacion);
+router.put("/diagnostico/:id_adir", authenticateToken, guardarDiagnostico);
+router.get("/resumen-ultimo/:id_paciente", authenticateToken, resumenUltimoTestPorPaciente);
 
 module.exports = router;

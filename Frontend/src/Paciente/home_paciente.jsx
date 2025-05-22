@@ -13,11 +13,6 @@ const COLOR_ACCENT = "#f3859e";
 
 // Iconos SVG accesibles y coloridos
 const icons = {
-    desactivar: (
-        <svg width="48" height="48" fill={COLOR_ACCENT} viewBox="0 0 24 24">
-            <path d="M12 2a10 10 0 1 0 10 10A10.011 10.011 0 0 0 12 2Zm1 17.93V20a1 1 0 0 1-2 0v-.07A8 8 0 1 1 20 12a7.93 7.93 0 0 1-7 7.93ZM12 4a8 8 0 0 1 8 8 7.93 7.93 0 0 1-7 7.93V20a1 1 0 0 1-2 0v-.07A8 8 0 0 1 12 4Zm1 8V7a1 1 0 0 0-2 0v5a1 1 0 0 0 .293.707l3 3a1 1 0 0 0 1.414-1.414Z"/>
-        </svg>
-    ),
     adir: (
         <svg width="48" height="48" fill={COLOR_PRIMARY} viewBox="0 0 24 24">
             <path d="M12 2a10 10 0 1 0 10 10A10.011 10.011 0 0 0 12 2Zm1 17.93V20a1 1 0 0 1-2 0v-.07A8 8 0 1 1 20 12a7.93 7.93 0 0 1-7 7.93ZM12 4a8 8 0 0 1 8 8 7.93 7.93 0 0 1-7 7.93V20a1 1 0 0 1-2 0v-.07A8 8 0 0 1 12 4Zm-1 8V7a1 1 0 0 1 2 0v5a1 1 0 0 1-.293.707l-3 3a1 1 0 0 1-1.414-1.414Z"/>
@@ -88,13 +83,6 @@ const Home = () => {
     // Opciones del home
     const opciones = [
         {
-            titulo: "Desactivar Cuenta",
-            color: COLOR_ACCENT,
-            icon: icons.desactivar,
-            onClick: () => navigate("/desactivar-cuenta"),
-            descripcion: "Desactiva tu cuenta de manera sencilla y segura."
-        },
-        {
             titulo: "Evaluación ADI-R",
             color: COLOR_PRIMARY,
             icon: icons.adir,
@@ -124,10 +112,8 @@ const Home = () => {
                 <h1 className="text-center mb-3" style={{ color: COLOR_PRIMARY, fontWeight: "bold" }}>
                     APLICACIÓN PARA LA EVALUACIÓN DE PERSONAS CON TRASTORNO DEL ESPECTRO AUTISTA (TEA)
                 </h1>
-                <h2 className="text-center" style={{ color: COLOR_DARK, fontWeight: "bold" }}>Paciente</h2>
-                <h3 className="text-center mb-5" style={{ color: COLOR_ACCENT, fontWeight: "bold" }}>
-                    ¡Bienvenido/a, {userName}!
-                </h3>
+                <h2 className="text-center mb-5" style={{ color: COLOR_DARK, fontWeight: "bold" }}>¡Bienvenido/a, {userName}!</h2>
+                
                 <div className="row g-4 justify-content-center">
                     {opciones.map((op, idx) => (
                         <div key={idx} className="col-12 col-sm-6 col-md-4 col-lg-3">
@@ -154,6 +140,24 @@ const Home = () => {
                             </div>
                         </div>
                     ))}
+                </div>
+                {/* Botón pequeño en la esquina inferior izquierda */}
+                <div className="d-flex justify-content-end mt-5">
+                    <button
+                        className="btn btn-outline-danger btn-sm d-flex align-items-center gap-2"
+                        style={{
+                            fontWeight: "bold",
+                            fontSize: "0.95rem",
+                            borderRadius: 20,
+                            padding: "6px 14px"
+                        }}
+                        title="Desactivar cuenta"
+                        aria-label="Desactivar cuenta"
+                        onClick={() => navigate("/desactivar-cuenta")}
+                    >
+                        <i className="bi bi-person-x-fill"></i>
+                        Desactivar cuenta
+                    </button>
                 </div>
             </div>
             <Footer />
