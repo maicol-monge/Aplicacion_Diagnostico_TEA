@@ -6,7 +6,9 @@ import Home_Paciente from "./Paciente/home_paciente";
 import Registrar from "./Especialista/Registrar";
 import EstablecerContra from "./pages/Login/EstablecerContra";
 import ProtectedRoute from "./ProtectedRoute";
-
+import Pacientes from './Especialista/Pacientes';
+import ListaTestsPaciente from './Evaluacion/ListaTestsPaciente';
+import ResumenADIR from './Evaluacion/ResumenADIR';
 
 function App() {
   useEffect(() => {
@@ -44,6 +46,9 @@ function App() {
         <Route element={<ProtectedRoute allowedPrivileges={[0]} />}>
           <Route path="/home_espe" element={<Home_Espe />} />
           <Route path="/registrar" element={<Registrar />} />
+          <Route path="/pacientes" element={<Pacientes />} />
+          <Route path="/tests-paciente/:id_paciente" element={<ListaTestsPaciente />} />
+          <Route path="/resumen-adir/:id_adir" element={<ResumenADIR />} />
         </Route>
         {/* Solo pacientes (privilegio 1) */}
         <Route element={<ProtectedRoute allowedPrivileges={[1]} />}>

@@ -4,7 +4,7 @@ const cors = require("cors"); //Para permitir solicitudes desde otro dominio
 
 const db = require("./config/db");
 const userRoutes = require("./routes/userRoutes");
-
+const adirRoutes = require('./routes/adirRoutes');
 
 const app = express(); //Instancia del servidor
 app.use(cors()); //Evitar errores al consumir en React
@@ -20,8 +20,7 @@ db.connect((err) => {
 
 // Ruta para ver todos los usuarios
 app.use("/api/users", userRoutes);
-
-
+app.use('/api/adir', adirRoutes);
 
 // Iniciar servidor
 const PORT = process.env.PORT || 5000;

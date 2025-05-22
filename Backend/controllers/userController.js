@@ -186,6 +186,19 @@ exports.cambiarContrasena = (req, res) => {
     });
 };
 
+exports.listarPacientes = (req, res) => {
+    const query = `
+        SELECT p.id_paciente, u.nombres, u.apellidos, p.sexo, p.fecha_nacimiento
+        FROM paciente p
+        JOIN usuario u ON p.id_usuario = u.id_usuario
+        ORDER BY u.nombres
+    `;
+    db.query(query, (err, results) => {
+        if (err) return res.status(500).json({ message: "Error al obtener pacientes." });
+        res.json(results); // <-- debe ser un array, NO { pacientes: results }
+    });
+};
+
 // Función para enviar correo
 function enviarCorreoBienvenida(destinatario, contrasena, nombre, apellidos) {
     // Configura tu transporte de correo (ejemplo con Gmail)
