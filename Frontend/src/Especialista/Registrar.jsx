@@ -169,7 +169,11 @@ const Registrar = () => {
                 icon: 'success',
                 confirmButtonText: 'Aceptar',
             }).then(() => {
-                navigate('/home_espe');
+                if (Number(formData.privilegio) === 0) {
+                    navigate('/pacientes');
+                } else {
+                    navigate('/home_espe');
+                }
             });
         } catch (err) {
             if (err.response) {
