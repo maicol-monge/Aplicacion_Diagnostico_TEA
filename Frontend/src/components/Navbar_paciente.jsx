@@ -67,7 +67,7 @@ const Navbar = () => {
                             TEA Diagnóstico
                         </span>
                     </span>
-                    {/* Botones al lado del logo en escritorio */}
+                    {/* Botón Inicio al lado del logo */}
                     <button
                         className="btn btn-sm ms-2 d-none d-lg-inline"
                         style={{
@@ -75,53 +75,9 @@ const Navbar = () => {
                             color: "#fff",
                             fontWeight: "bold"
                         }}
-                        onClick={() => navigate("/home_espe")}
+                        onClick={() => navigate("/home_paciente")}
                     >
                         Inicio
-                    </button>
-                    <button
-                        className="btn btn-sm ms-2 d-none d-lg-inline"
-                        style={{
-                            background: COLOR_DARK,
-                            color: "#fff",
-                            fontWeight: "bold"
-                        }}
-                        onClick={() => navigate("/registrar")}
-                    >
-                        Registrar Usuario
-                    </button>
-                    <button
-                        className="btn btn-sm ms-2 d-none d-lg-inline"
-                        style={{
-                            background: COLOR_DARK,
-                            color: "#fff",
-                            fontWeight: "bold"
-                        }}
-                        onClick={() => navigate("/revision-adir")}
-                    >
-                       Revisión ADI-R
-                    </button>
-                    <button
-                        className="btn btn-sm ms-2 d-none d-lg-inline"
-                        style={{
-                            background: COLOR_DARK,
-                            color: "#fff",
-                            fontWeight: "bold"
-                        }}
-                        onClick={() => navigate("/evaluacion-ados")}
-                    >
-                       Evaluación ADOS-2
-                    </button>
-                    <button
-                        className="btn btn-sm ms-2 d-none d-lg-inline"
-                        style={{
-                            background: COLOR_DARK,
-                            color: "#fff",
-                            fontWeight: "bold"
-                        }}
-                        onClick={() => navigate("/reportes")}
-                    >
-                       Reportes
                     </button>
                 </div>
                 <button
@@ -135,7 +91,7 @@ const Navbar = () => {
                 </button>
                 <div className={`collapse navbar-collapse justify-content-end ${showMenu ? "show" : ""}`}>
                     <ul className={`navbar-nav align-items-lg-center ms-auto ${showMenu ? "flex-column text-center" : ""}`}>
-                        {/* Botones solo visibles en menú sandwich */}
+                        {/* Botón Inicio solo visible en menú sandwich */}
                         <li className="nav-item d-lg-none mb-2">
                             <button
                                 className="btn btn-sm w-100"
@@ -146,74 +102,10 @@ const Navbar = () => {
                                 }}
                                 onClick={() => {
                                     setShowMenu(false);
-                                    navigate("/home_espe");
+                                    navigate("/home_paciente");
                                 }}
                             >
                                 Inicio
-                            </button>
-                        </li>
-                        <li className="nav-item d-lg-none mb-2">
-                            <button
-                                className="btn btn-sm w-100"
-                                style={{
-                                    background: COLOR_DARK,
-                                    color: "#fff",
-                                    fontWeight: "bold"
-                                }}
-                                onClick={() => {
-                                    setShowMenu(false);
-                                    navigate("/registrar");
-                                }}
-                            >
-                                Registrar Usuario
-                            </button>
-                        </li>
-                        <li className="nav-item d-lg-none mb-2">
-                            <button
-                                className="btn btn-sm w-100"
-                                style={{
-                                    background: COLOR_DARK,
-                                    color: "#fff",
-                                    fontWeight: "bold"
-                                }}
-                                onClick={() => {
-                                    setShowMenu(false);
-                                    navigate("/revision-adir");
-                                }}
-                            >
-                                Revisión ADI-R
-                            </button>
-                        </li>
-                        <li className="nav-item d-lg-none mb-2">
-                            <button
-                                className="btn btn-sm w-100"
-                                style={{
-                                    background: COLOR_DARK,
-                                    color: "#fff",
-                                    fontWeight: "bold"
-                                }}
-                                onClick={() => {
-                                    setShowMenu(false);
-                                    navigate("/evaluacion-ados");
-                                }}
-                            >
-                                Evaluación ADOS-2
-                            </button>
-                        </li>
-                        <li className="nav-item d-lg-none mb-2">
-                            <button
-                                className="btn btn-sm w-100"
-                                style={{
-                                    background: COLOR_DARK,
-                                    color: "#fff",
-                                    fontWeight: "bold"
-                                }}
-                                onClick={() => {
-                                    setShowMenu(false);
-                                    navigate("/reportes");
-                                }}
-                            >
-                                Reportes
                             </button>
                         </li>
                         <li className="nav-item d-flex flex-column flex-lg-row align-items-center ms-lg-3 mt-2 mt-lg-0">
@@ -227,8 +119,8 @@ const Navbar = () => {
                             <img
                                 src={fotoPerfil}
                                 alt="Perfil"
-                                width="50"
-                                height="50"
+                                width="40"
+                                height="40"
                                 style={{
                                     borderRadius: "50%",
                                     objectFit: "cover",

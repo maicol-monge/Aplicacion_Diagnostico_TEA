@@ -4,6 +4,8 @@ const cors = require("cors"); //Para permitir solicitudes desde otro dominio
 
 const db = require("./config/db");
 const userRoutes = require("./routes/userRoutes");
+const pacienteRoutes = require("./routes/pacienteRoutes");
+const especialistaRoutes = require("./routes/especialistaRoutes");
 
 
 const app = express(); //Instancia del servidor
@@ -18,8 +20,10 @@ db.connect((err) => {
   console.log("Conectado a la base de datos MySQL");
 });
 
-// Ruta para ver todos los usuarios
+// Rutas
 app.use("/api/users", userRoutes);
+app.use("/api/pacientes", pacienteRoutes);
+app.use("/api/especialistas", especialistaRoutes);
 
 
 
