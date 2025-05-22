@@ -47,10 +47,17 @@ const EstablecerContra = () => {
         }
         setLoading(true);
         try {
+            const token = localStorage.getItem("token");
+            
             await axios.post('http://localhost:5000/api/users/cambiar-contrasena', {
                 id_usuario,
                 nuevaContra
-            });
+            },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
             Swal.fire({
                 title: '¡Contraseña actualizada!',
                 text: 'Ahora puedes iniciar sesión con tu nueva contraseña.',

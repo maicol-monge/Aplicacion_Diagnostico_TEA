@@ -23,6 +23,7 @@ const LoginForm = () => {
                             icon: "info",
                             confirmButtonText: "Continuar"
                         }).then(() => {
+                            localStorage.setItem("token", data.token);
                             navigate("/establecer-contra", {
                                 state: {
                                     id_usuario: data.user.id_usuario,
@@ -32,15 +33,16 @@ const LoginForm = () => {
                         });
                         return;
                     }
-                    // Login normal
+                    // Login normal: guarda token y datos de usuario
                     const { id_usuario, nombres, apellidos, correo, privilegio, imagen } = data.user;
                     localStorage.setItem("user", JSON.stringify({ id_usuario, nombres, apellidos, correo, privilegio, imagen }));
+                    localStorage.setItem("token", data.token); // Guarda el token para futuras peticiones
+
                     if (privilegio === 0) {
-                        navigate("/home_espe");
+                        navigate("/pacientes");
                     } else if (privilegio === 1) {
                         navigate("/home_paciente");
-                    }
-                    else {
+                    } else {
                         navigate("/");
                     }
                 })
