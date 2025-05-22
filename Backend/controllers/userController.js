@@ -8,30 +8,30 @@ const JWT_SECRET = process.env.JWT_SECRET;
 exports.login = (req, res) => {
     const { correo, contrasena } = req.body;
 
+    
     if (!correo || !contrasena) {
         return res.status(400).json({ message: "Correo y contraseña son requeridos" });
     }
 
-    const query = "SELECT * FROM usuario WHERE correo = ?";
-    db.query(query, [correo], (err, results) => {
-        if (err) {
-            return res.status(500).json({ message: "Error en el servidor", error: err });
-        }
+    db.query(
+        "SELECT * FROM usuario WHERE correo = ?",
+        [correo],
+        async (err, results) => {
+            if (err) return res.status(500).json({ message: "Error en el servidor" });
+            if (results.length === 0) return res.status(401).json({ message: "Correo o contraseña incorrectos" });
 
-        if (results.length === 0) {
-            return res.status(401).json({ message: "Correo o contraseña incorrectos" });
-        }
+            const user = results[0];
 
-        const user = results[0];
-
-        bcrypt.compare(contrasena, user.contrasena, (err, isMatch) => {
-            if (err) {
-                return res.status(500).json({ message: "Error al verificar la contraseña", error: err });
+            // Validar si la cuenta está desactivada
+            if (user.estado === 0) {
+                return res.status(403).json({
+                    message: "Tu cuenta está desactivada. Por favor, contacta al administrador al correo aplicaciondediagnosticodetea@gmail.com"
+                });
             }
 
-            if (!isMatch) {
-                return res.status(401).json({ message: "Correo o contraseña incorrectos" });
-            }
+            // Validar contraseña
+            const match = await bcrypt.compare(contrasena, user.contrasena);
+            if (!match) return res.status(401).json({ message: "Correo o contraseña incorrectos" });
 
             // Si requiere cambio de contraseña
             if (user.requiere_cambio_contrasena === 1) {
@@ -76,8 +76,8 @@ exports.login = (req, res) => {
                     estado: user.estado
                 }
             });
-        });
-    });
+        }
+    );
 };
 
 exports.registrar = (req, res) => {

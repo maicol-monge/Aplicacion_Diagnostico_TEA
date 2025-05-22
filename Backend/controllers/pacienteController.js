@@ -133,3 +133,66 @@ exports.validarTerminos = (req, res) => {
         }
     );
 };
+
+exports.desactivarCuenta = (req, res) => {
+    const { id_usuario } = req.params;
+
+    // Primero obtenemos el correo y nombre del usuario
+    const queryUser = "SELECT correo, nombres, apellidos FROM usuario WHERE id_usuario = ?";
+    db.query(queryUser, [id_usuario], (err, results) => {
+        if (err || results.length === 0) {
+            return res.status(500).json({ message: "Error al obtener datos del usuario", error: err });
+        }
+        const { correo, nombres, apellidos } = results[0];
+
+        // Actualiza el estado de la cuenta a desactivado (0)
+        const query = "UPDATE usuario SET estado = 0 WHERE id_usuario = ?";
+        db.query(query, [id_usuario], (err, result) => {
+            if (err) {
+                return res.status(500).json({ message: "Error al desactivar cuenta", error: err });
+            }
+
+            // Envía el correo de notificación
+            enviarCorreoDesactivacion(correo, nombres, apellidos);
+
+            return res.status(200).json({ message: "Cuenta desactivada exitosamente" });
+        });
+    });
+};
+
+// Función para enviar el correo de desactivación
+function enviarCorreoDesactivacion(destinatario, nombre, apellidos) {
+    const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+            user: process.env.GMAIL_USER,
+            pass: process.env.GMAIL_PASS
+        }
+    });
+
+    const mensaje = `
+Hola ${nombre} ${apellidos},
+
+Te informamos que tu cuenta en la aplicación de diagnóstico TEA ha sido desactivada exitosamente.
+
+Si esto fue un error o necesitas reactivar tu cuenta, por favor contacta al administrador al correo aplicaciondediagnosticodetea@gmail.com.
+
+Saludos,
+Equipo TEA Diagnóstico
+`;
+
+    const mailOptions = {
+        from: 'aplicaciondediagnosticodetea@gmail.com',
+        to: destinatario,
+        subject: "Cuenta desactivada - TEA Diagnóstico",
+        text: mensaje
+    };
+
+    transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
+            console.log('Error enviando correo de desactivación:', error);
+        } else {
+            console.log('Correo de desactivación enviado: ' + info.response);
+        }
+    });
+}

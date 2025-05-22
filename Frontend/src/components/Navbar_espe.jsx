@@ -48,7 +48,7 @@ const Navbar = () => {
                     <span
                         className="navbar-brand d-flex align-items-center"
                         style={{ cursor: "pointer" }}
-                        onClick={() => navigate("/")}
+                        onClick={() => navigate("/home_espe")}
                     >
                         <img
                             src={Logo}
@@ -97,9 +97,9 @@ const Navbar = () => {
                             color: "#fff",
                             fontWeight: "bold"
                         }}
-                        onClick={() => navigate("/revision-adir")}
+                        onClick={() => navigate("/pacientes")}
                     >
-                       Revisión ADI-R
+                        Revisión ADI-R
                     </button>
                     <button
                         className="btn btn-sm ms-2 d-none d-lg-inline"
@@ -110,7 +110,7 @@ const Navbar = () => {
                         }}
                         onClick={() => navigate("/evaluacion-ados")}
                     >
-                       Evaluación ADOS-2
+                        Evaluación ADOS-2
                     </button>
                     <button
                         className="btn btn-sm ms-2 d-none d-lg-inline"
@@ -121,7 +121,7 @@ const Navbar = () => {
                         }}
                         onClick={() => navigate("/reportes")}
                     >
-                       Reportes
+                        Reportes
                     </button>
                 </div>
                 <button
@@ -178,7 +178,7 @@ const Navbar = () => {
                                 }}
                                 onClick={() => {
                                     setShowMenu(false);
-                                    navigate("/revision-adir");
+                                    navigate("/pacientes");
                                 }}
                             >
                                 Revisión ADI-R
