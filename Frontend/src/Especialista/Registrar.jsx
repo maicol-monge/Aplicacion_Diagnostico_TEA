@@ -371,7 +371,7 @@ const Registrar = () => {
                                             color: "#fff",
                                             fontWeight: "bold"
                                         }}
-                                        onClick={() => navigate('/')}
+                                        onClick={() => navigate('/home_espe')}
                                     >
                                         Cancelar
                                     </button>

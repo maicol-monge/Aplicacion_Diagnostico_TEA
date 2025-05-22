@@ -6,6 +6,8 @@ import Home_Paciente from "./Paciente/home_paciente";
 import Registrar from "./Especialista/Registrar";
 import EstablecerContra from "./pages/Login/EstablecerContra";
 import ProtectedRoute from "./ProtectedRoute";
+import ConsentimientoInformado from "./Paciente/Consetimiento";
+import ConsentimientoProfesional from "./Especialista/ConsentimientoEspecialista";
 
 
 function App() {
@@ -44,10 +46,12 @@ function App() {
         <Route element={<ProtectedRoute allowedPrivileges={[0]} />}>
           <Route path="/home_espe" element={<Home_Espe />} />
           <Route path="/registrar" element={<Registrar />} />
+          <Route path="/consentimiento-especialista" element={<ConsentimientoProfesional />} />
         </Route>
         {/* Solo pacientes (privilegio 1) */}
         <Route element={<ProtectedRoute allowedPrivileges={[1]} />}>
           <Route path="/home_paciente" element={<Home_Paciente />} />
+          <Route path="/consentimiento-informado" element={<ConsentimientoInformado />} />
         </Route>
       </Routes>
     </Router>
