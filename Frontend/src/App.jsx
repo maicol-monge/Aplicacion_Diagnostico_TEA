@@ -6,6 +6,8 @@ import Home_Paciente from "./Paciente/home_paciente";
 import Registrar from "./Especialista/Registrar";
 import EstablecerContra from "./pages/Login/EstablecerContra";
 import ProtectedRoute from "./ProtectedRoute";
+import ConsentimientoInformado from "./Paciente/Consetimiento";
+import ConsentimientoProfesional from "./Especialista/ConsentimientoEspecialista";
 import Pacientes from './Especialista/Pacientes';
 import ListaTestsPaciente from './Evaluacion/ListaTestsPaciente';
 import ResumenADIR from './Evaluacion/ResumenADIR';
@@ -46,6 +48,7 @@ function App() {
         <Route element={<ProtectedRoute allowedPrivileges={[0]} />}>
           <Route path="/home_espe" element={<Home_Espe />} />
           <Route path="/registrar" element={<Registrar />} />
+          <Route path="/consentimiento-especialista" element={<ConsentimientoProfesional />} />
           <Route path="/pacientes" element={<Pacientes />} />
           <Route path="/tests-paciente/:id_paciente" element={<ListaTestsPaciente />} />
           <Route path="/resumen-adir/:id_adir" element={<ResumenADIR />} />
@@ -53,6 +56,7 @@ function App() {
         {/* Solo pacientes (privilegio 1) */}
         <Route element={<ProtectedRoute allowedPrivileges={[1]} />}>
           <Route path="/home_paciente" element={<Home_Paciente />} />
+          <Route path="/consentimiento-informado" element={<ConsentimientoInformado />} />
         </Route>
       </Routes>
     </Router>
