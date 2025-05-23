@@ -48,7 +48,7 @@ const Navbar = () => {
                     <span
                         className="navbar-brand d-flex align-items-center"
                         style={{ cursor: "pointer" }}
-                        onClick={() => navigate("/")}
+                        onClick={() => navigate("/home_paciente")}
                     >
                         <img
                             src={Logo}
@@ -79,6 +79,39 @@ const Navbar = () => {
                     >
                         Inicio
                     </button>
+                    <button
+                        className="btn btn-sm ms-2 d-none d-lg-inline"
+                        style={{
+                            background: COLOR_DARK,
+                            color: "#fff",
+                            fontWeight: "bold"
+                        }}
+                        onClick={() => navigate("/evaluacion-adir")}
+                    >
+                        Evaluación ADI-R
+                    </button>
+                    <button
+                        className="btn btn-sm ms-2 d-none d-lg-inline"
+                        style={{
+                            background: COLOR_DARK,
+                            color: "#fff",
+                            fontWeight: "bold"
+                        }}
+                        onClick={() => navigate("/reportes")}
+                    >
+                        Reportes
+                    </button>
+                    <button
+                        className="btn btn-sm ms-2 d-none d-lg-inline"
+                        style={{
+                            background: COLOR_DARK,
+                            color: "#fff",
+                            fontWeight: "bold"
+                        }}
+                        onClick={() => navigate("/resultados")}
+                    >
+                        Resultados
+                    </button>
                 </div>
                 <button
                     className="navbar-toggler"
@@ -108,6 +141,57 @@ const Navbar = () => {
                                 Inicio
                             </button>
                         </li>
+                        {/* Botón Evaluación ADI-R solo visible en menú sandwich */}
+                        <li className="nav-item d-lg-none mb-2">
+                            <button
+                                className="btn btn-sm w-100"
+                                style={{
+                                    background: COLOR_DARK,
+                                    color: "#fff",
+                                    fontWeight: "bold"
+                                }}
+                                onClick={() => {
+                                    setShowMenu(false);
+                                    navigate("/evaluacion-adir");
+                                }}
+                            >
+                                Evaluación ADI-R
+                            </button>
+                        </li>
+                        {/* Botón Reportes solo visible en menú sandwich */}
+                        <li className="nav-item d-lg-none mb-2">
+                            <button
+                                className="btn btn-sm w-100"
+                                style={{
+                                    background: COLOR_DARK,
+                                    color: "#fff",
+                                    fontWeight: "bold"
+                                }}
+                                onClick={() => {
+                                    setShowMenu(false);
+                                    navigate("/reportes");
+                                }}
+                            >
+                                Reportes
+                            </button>
+                        </li>
+                        {/* Botón Resultados solo visible en menú sandwich */}
+                        <li className="nav-item d-lg-none mb-2">
+                            <button
+                                className="btn btn-sm w-100"
+                                style={{
+                                    background: COLOR_DARK,
+                                    color: "#fff",
+                                    fontWeight: "bold"
+                                }}
+                                onClick={() => {
+                                    setShowMenu(false);
+                                    navigate("/resultados");
+                                }}
+                            >
+                                Resultados
+                            </button>
+                        </li>
                         <li className="nav-item d-flex flex-column flex-lg-row align-items-center ms-lg-3 mt-2 mt-lg-0">
                             <p className="text-light mb-2 mb-lg-0 me-lg-2" style={{ fontSize: 16 }}>
                                 ¡Bienvenido/a,{" "}
@@ -119,15 +203,17 @@ const Navbar = () => {
                             <img
                                 src={fotoPerfil}
                                 alt="Perfil"
-                                width="40"
-                                height="40"
+                                width="50"
+                                height="50"
                                 style={{
                                     borderRadius: "50%",
                                     objectFit: "cover",
                                     border: `2px solid ${COLOR_ACCENT}`,
                                     marginRight: 10,
-                                    marginLeft: 5
+                                    marginLeft: 5,
+                                    cursor: "pointer" // Para indicar que es clickeable
                                 }}
+                                onClick={() => navigate("/perfil-paciente")}
                             />
                             <button
                                 className="btn mt-2 mt-lg-0"

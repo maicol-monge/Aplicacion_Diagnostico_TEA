@@ -69,7 +69,7 @@ const ConsentimientoInformado = () => {
 
     return (
         <div className="container mt-5">
-            <div className="card shadow">
+            <div className="card shadow m-4">
                 <div className="card-header bg-primary text-white">
                     <h4>Consentimiento Informado</h4>
                 </div>

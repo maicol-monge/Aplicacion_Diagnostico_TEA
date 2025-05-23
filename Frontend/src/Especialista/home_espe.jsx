@@ -74,7 +74,7 @@ const Home = () => {
             titulo: "Revisión Evaluaciones ADI-R",
             color: COLOR_PRIMARY,
             icon: icons.revision,
-            onClick: () => navigate("/revision-adir"),
+            onClick: () => navigate("/pacientes"),
             descripcion: "Revisa evaluaciones ADI-R realizadas por pacientes y emite diagnóstico."
         },
         {
@@ -100,10 +100,8 @@ const Home = () => {
                 <h1 className="text-center mb-3" style={{ color: COLOR_PRIMARY, fontWeight: "bold" }}>
                     APLICACIÓN PARA LA EVALUACIÓN DE PERSONAS CON TRASTORNO DEL ESPECTRO AUTISTA (TEA)
                 </h1>
-                <h2 className="text-center" style={{ color: COLOR_DARK, fontWeight: "bold" }}>Especialista</h2>
-                <h3 className="text-center mb-5" style={{ color: COLOR_ACCENT, fontWeight: "bold" }}>
-                    ¡Bienvenido/a, {userName}!
-                </h3>
+                <h2 className="text-center mb-5" style={{ color: COLOR_DARK, fontWeight: "bold" }}>¡Bienvenido/a, {userName}!</h2>
+                
                 <div className="row g-4 justify-content-center">
                     {opciones.map((op, idx) => (
                         <div key={idx} className="col-12 col-sm-6 col-md-4 col-lg-3">
