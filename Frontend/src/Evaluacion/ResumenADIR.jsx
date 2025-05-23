@@ -30,7 +30,15 @@ const ResumenADIR = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        axios.get(`http://localhost:5000/api/adir/${id_adir}`)
+        const token = localStorage.getItem("token");
+        axios.get(
+            `http://localhost:5000/api/adir/resumen/${id_adir}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        )
             .then(res => {
                 setResumen(res.data);
                 setDiagnostico(res.data.test.diagnostico || "");
@@ -42,7 +50,16 @@ const ResumenADIR = () => {
 
     const guardarDiagnostico = async () => {
         try {
-            await axios.put(`http://localhost:5000/api/adir/${id_adir}/diagnostico`, { diagnostico });
+            const token = localStorage.getItem("token");
+            await axios.put(
+                `http://localhost:5000/api/adir/diagnostico/${id_adir}`,
+                { diagnostico },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
             Swal.fire("Diagnóstico guardado", "", "success");
             setEditando(false);
         } catch {
