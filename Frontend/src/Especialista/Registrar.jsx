@@ -3,7 +3,7 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
 import { createClient } from '@supabase/supabase-js';
-import Navbar from '../components/Navbar';
+import Navbar from '../components/Navbar_espe';
 import Footer from '../components/Footer';
 
 // Colores de la paleta
@@ -23,9 +23,11 @@ const Registrar = () => {
         direccion: '',
         telefono: '',
         correo: '',
-        contrasena: '',
         privilegio: '',
-        imagen: ''
+        imagen: '',
+        especialidad: '',
+        fecha_nacimiento: '',
+        sexo: ''
     });
     const [imagenFile, setImagenFile] = useState(null);
 
@@ -62,15 +64,26 @@ const Registrar = () => {
     };
 
     const camposRequeridosLlenos = () => {
-        return (
-            formData.nombres.trim() !== '' &&
-            formData.apellidos.trim() !== '' &&
-            formData.direccion.trim() !== '' &&
-            formData.telefono.trim() !== '' &&
-            formData.correo.trim() !== '' &&
-            validateEmail(formData.correo) &&
-            formData.privilegio !== ''
-        );
+        if (
+            formData.nombres.trim() === '' ||
+            formData.apellidos.trim() === '' ||
+            formData.direccion.trim() === '' ||
+            formData.telefono.trim() === '' ||
+            formData.correo.trim() === '' ||
+            !validateEmail(formData.correo) ||
+            formData.privilegio === ''
+        ) {
+            return false;
+        }
+        if (Number(formData.privilegio) === 1) {
+            // Paciente
+            return formData.fecha_nacimiento !== '' && formData.sexo !== '';
+        }
+        if (Number(formData.privilegio) === 0) {
+            // Especialista
+            return formData.especialidad.trim() !== '';
+        }
+        return true;
     };
 
     const handleSubmit = async (e) => {
@@ -96,44 +109,71 @@ const Registrar = () => {
             return;
         }
 
-        let imagenUrl = '';
-        if (imagenFile) {
-            const fileExt = imagenFile.name.split('.').pop();
-            const fileName = `${Date.now()}.${fileExt}`;
-            const { data, error } = await supabase.storage
-                .from('tea')
-                .upload(fileName, imagenFile);
+        try {
+            let imagenUrl = '';
+            if (imagenFile) {
+                const fileExt = imagenFile.name.split('.').pop();
+                const fileName = `${Date.now()}.${fileExt}`;
+                const { data, error } = await supabase.storage
+                    .from('tea')
+                    .upload(fileName, imagenFile);
 
-            if (error) {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Error al subir la imagen a Supabase',
-                    icon: 'error',
-                    confirmButtonText: 'Aceptar',
-                });
-                return;
+                if (error) {
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Error al subir la imagen a Supabase',
+                        icon: 'error',
+                        confirmButtonText: 'Aceptar',
+                    });
+                    return;
+                }
+
+                const { data: publicUrlData } = supabase
+                    .storage
+                    .from('tea')
+                    .getPublicUrl(fileName);
+
+                imagenUrl = publicUrlData.publicUrl;
             }
 
-            const { data: publicUrlData } = supabase
-                .storage
-                .from('tea')
-                .getPublicUrl(fileName);
-
-            imagenUrl = publicUrlData.publicUrl;
-        }
-
-        try {
-            const response = await axios.post('http://localhost:5000/api/users/registrar', {
+            const payload = {
                 ...formData,
                 imagen: imagenUrl
-            });
+            };
+
+            // Elimina campos no requeridos según privilegio
+            if (Number(formData.privilegio) === 1) {
+                delete payload.especialidad;
+            } else if (Number(formData.privilegio) === 0) {
+                delete payload.fecha_nacimiento;
+                delete payload.sexo;
+            }
+
+            // Obtén el token del localStorage
+            const token = localStorage.getItem("token");
+
+            // Envía el token en el header Authorization
+            const response = await axios.post(
+                'http://localhost:5000/api/users/registrar',
+                payload,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
+
             Swal.fire({
                 title: '¡Registro exitoso!',
                 text: response.data.message,
                 icon: 'success',
                 confirmButtonText: 'Aceptar',
             }).then(() => {
-                navigate('/');
+                if (Number(formData.privilegio) === 0) {
+                    navigate('/pacientes');
+                } else {
+                    navigate('/home_espe');
+                }
             });
         } catch (err) {
             if (err.response) {
@@ -153,6 +193,11 @@ const Registrar = () => {
             }
         }
     };
+
+    // Calcular el día anterior a hoy en formato YYYY-MM-DD
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const maxDate = yesterday.toISOString().split('T')[0];
 
     return (
         <div
@@ -254,6 +299,52 @@ const Registrar = () => {
                                         <option value="1">Paciente</option>
                                     </select>
                                 </div>
+
+                                {/* Campos dinámicos según privilegio */}
+                                {Number(formData.privilegio) === 0 && (
+                                    <div className="mb-3">
+                                        <label className="form-label" style={{ color: COLOR_DARK }}>Especialidad:</label>
+                                        <input
+                                            type="text"
+                                            name="especialidad"
+                                            className="form-control"
+                                            value={formData.especialidad}
+                                            onChange={handleChange}
+                                            required
+                                        />
+                                    </div>
+                                )}
+                                {Number(formData.privilegio) === 1 && (
+                                    <>
+                                        <div className="mb-3">
+                                            <label className="form-label" style={{ color: COLOR_DARK }}>Fecha de Nacimiento:</label>
+                                            <input
+                                                type="date"
+                                                name="fecha_nacimiento"
+                                                className="form-control"
+                                                value={formData.fecha_nacimiento}
+                                                onChange={handleChange}
+                                                required
+                                                max={maxDate} // Solo permite fechas antes de hoy
+                                            />
+                                        </div>
+                                        <div className="mb-3">
+                                            <label className="form-label" style={{ color: COLOR_DARK }}>Sexo:</label>
+                                            <select
+                                                name="sexo"
+                                                className="form-select"
+                                                value={formData.sexo}
+                                                onChange={handleChange}
+                                                required
+                                            >
+                                                <option value="">Seleccione</option>
+                                                <option value="M">Masculino</option>
+                                                <option value="F">Femenino</option>
+                                            </select>
+                                        </div>
+                                    </>
+                                )}
+
                                 <div className="mb-3">
                                     <label className="form-label" style={{ color: COLOR_DARK }}>Foto de Perfil (opcional):</label>
                                     <input
@@ -284,7 +375,7 @@ const Registrar = () => {
                                             color: "#fff",
                                             fontWeight: "bold"
                                         }}
-                                        onClick={() => navigate('/')}
+                                        onClick={() => navigate('/home_espe')}
                                     >
                                         Cancelar
                                     </button>
