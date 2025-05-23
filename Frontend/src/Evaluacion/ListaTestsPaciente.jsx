@@ -15,8 +15,16 @@ const ListaTestsPaciente = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        axios.get(`http://localhost:5000/api/adir/paciente/${id_paciente}`)
-            .then(res => setTests(res.data));
+        const token = localStorage.getItem("token");
+        axios.get(
+            `http://localhost:5000/api/adir/listar/${id_paciente}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        )
+        .then(res => setTests(res.data));
     }, [id_paciente]);
 
     return (
