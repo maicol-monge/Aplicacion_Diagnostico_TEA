@@ -17,22 +17,32 @@ const GenerarReportes = () => {
     const [fecha, setFecha] = useState("");
 
     useEffect(() => {
-        const user = JSON.parse(localStorage.getItem("user"));
-        const token = localStorage.getItem("token");
-        if (!user || !token) return;
-        axios.get(
-            `http://localhost:5000/api/adir/listar/${user.id_paciente}`,
-            { headers: { Authorization: `Bearer ${token}` } }
-        )
-            .then(res => {
+        const fetchTests = async () => {
+            const user = JSON.parse(localStorage.getItem("user"));
+            const token = localStorage.getItem("token");
+            if (!user || !token) return;
+            try {
+                // 1. Obtener id_paciente usando el método del controller
+                const { data: pacienteData } = await axios.get(
+                    `http://localhost:5000/api/pacientes/buscar-paciente/${user.id_usuario}`,
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+                const id_paciente = pacienteData.paciente.id_paciente;
+
+                // 2. Listar tests usando el id_paciente obtenido
+                const res = await axios.get(
+                    `http://localhost:5000/api/adir/listar/${id_paciente}`,
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
                 setTests(res.data);
                 setFiltered(res.data);
                 setLoading(false);
-            })
-            .catch(() => {
+            } catch (err) {
                 setError("No se pudieron cargar los tests.");
                 setLoading(false);
-            });
+            }
+        };
+        fetchTests();
     }, []);
 
     // Filtrar por fecha
