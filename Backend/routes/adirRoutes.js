@@ -9,6 +9,7 @@ const {
     obtenerPreguntasAdir,
     crearTestAdir,
     guardarRespuestasAdir
+
 } = require("../controllers/adirController");
 const authenticateToken = require("../middlewares/auth"); // Usa el mismo middleware que en pacienteRoutes.js
 
@@ -24,5 +25,6 @@ router.get("/pdf/:id_adir", authenticateToken, generarPdfAdir); // <-- nueva rut
 router.get("/preguntas", authenticateToken, obtenerPreguntasAdir);
 router.post("/crear-test", authenticateToken, crearTestAdir);
 router.post("/guardar-respuestas/:id_adir", authenticateToken, guardarRespuestasAdir);
+
 
 module.exports = router;
