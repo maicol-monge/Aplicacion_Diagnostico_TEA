@@ -366,3 +366,5 @@ function enviarCorreoRecuperacion(destinatario, contrasena, nombre, apellidos) {
     });
 }
 
+
+

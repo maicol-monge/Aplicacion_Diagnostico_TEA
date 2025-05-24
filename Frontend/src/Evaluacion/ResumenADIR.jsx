@@ -51,9 +51,21 @@ const ResumenADIR = () => {
     const guardarDiagnostico = async () => {
         try {
             const token = localStorage.getItem("token");
+            const user = JSON.parse(localStorage.getItem("user"));
+            const id_usuario = user?.id_usuario;
+
+            // 1. Consultar el id_especialista usando el id_usuario
+            const resp = await axios.get(
+                `http://localhost:5000/api/especialistas/buscar-espe/${id_usuario}`,
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            // Así obtienes el id_especialista:
+            const id_especialista = resp.data.especialista.id_especialista;
+
+            // 2. Guardar el diagnóstico junto con el id_especialista
             await axios.put(
                 `http://localhost:5000/api/adir/diagnostico/${id_adir}`,
-                { diagnostico },
+                { diagnostico, id_especialista },
                 {
                     headers: {
                         Authorization: `Bearer ${token}`

@@ -4,8 +4,12 @@ const {
     obtenerResumenEvaluacion,
     guardarDiagnostico,
     resumenUltimoTestPorPaciente,
-    obtenerPreguntasTestCompleto,
-    crearTestAdirConRespuestas // <-- Agrega esto
+    listarTestsConDiagnosticoPorPaciente,
+    generarPdfAdir,
+    obtenerPreguntasAdir,
+    crearTestAdir,
+    guardarRespuestasAdir
+
 } = require("../controllers/adirController");
 const authenticateToken = require("../middlewares/auth"); // Usa el mismo middleware que en pacienteRoutes.js
 
@@ -16,7 +20,11 @@ router.get("/listar/:id_paciente", authenticateToken, listarTestsPorPaciente);
 router.get("/resumen/:id_adir", authenticateToken, obtenerResumenEvaluacion);
 router.put("/diagnostico/:id_adir", authenticateToken, guardarDiagnostico);
 router.get("/resumen-ultimo/:id_paciente", authenticateToken, resumenUltimoTestPorPaciente);
-router.get("/preguntas-test", authenticateToken, obtenerPreguntasTestCompleto);
-router.post("/crear-con-respuestas", authenticateToken, crearTestAdirConRespuestas); // <-- Nueva ruta para crear test ADIR con respuestas
+router.get("/listar-con-diagnostico/:id_paciente", authenticateToken, listarTestsConDiagnosticoPorPaciente);
+router.get("/pdf/:id_adir", authenticateToken, generarPdfAdir); // <-- nueva ruta para generar PDF
+router.get("/preguntas", authenticateToken, obtenerPreguntasAdir);
+router.post("/crear-test", authenticateToken, crearTestAdir);
+router.post("/guardar-respuestas/:id_adir", authenticateToken, guardarRespuestasAdir);
+
 
 module.exports = router;
