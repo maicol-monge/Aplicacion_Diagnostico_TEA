@@ -366,3 +366,39 @@ function enviarCorreoRecuperacion(destinatario, contrasena, nombre, apellidos) {
     });
 }
 
+// Función para enviar correo de diagnóstico
+function enviarCorreoDiagnostico(destinatario, nombre, apellidos, diagnostico) {
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: process.env.GMAIL_USER,
+            pass: process.env.GMAIL_PASS
+        }
+    });
+
+    const mailOptions = {
+        from: 'aplicaciondediagnosticodetea@gmail.com',
+        to: destinatario,
+        subject: 'Nuevo diagnóstico ADIR',
+        text: `Hola ${nombre} ${apellidos},\n\nSe ha registrado un nuevo diagnóstico ADIR para ti:\n\n"${diagnostico}"\n\nSi tienes dudas, contacta a tu especialista.\n\nSaludos.`
+    };
+
+    transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
+            console.log('Error enviando correo de diagnóstico:', error);
+        } else {
+            console.log('Correo de diagnóstico enviado: ' + info.response);
+        }
+    });
+}
+
+module.exports = {
+    login,
+    registrar,
+    cambiarContrasena,
+    cambiarPasswordConActual,
+    listarPacientes,
+    recuperarContrasena,
+    enviarCorreoDiagnostico
+};
+
