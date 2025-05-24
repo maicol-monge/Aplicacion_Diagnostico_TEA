@@ -1,5 +1,12 @@
 const db = require("../config/db");
+
 const { enviarCorreoDiagnostico } = require('./userController'); // Importa la función
+
+const { PDFDocument, rgb } = require('pdf-lib');
+const dayjs = require('dayjs');
+const fs = require('fs');
+const path = require('path');
+
 
 // Listar tests ADIR por paciente
 exports.listarTestsPorPaciente = (req, res) => {
@@ -8,6 +15,21 @@ exports.listarTestsPorPaciente = (req, res) => {
         SELECT t.id_adir, t.fecha, t.diagnostico
         FROM test_adi_r t
         WHERE t.id_paciente = ?
+        ORDER BY t.fecha DESC
+    `;
+    db.query(query, [id_paciente], (err, results) => {
+        if (err) return res.status(500).json({ message: "Error al obtener tests." });
+        res.json(results);
+    });
+};
+
+// Listar tests ADIR por paciente SOLO con diagnóstico
+exports.listarTestsConDiagnosticoPorPaciente = (req, res) => {
+    const { id_paciente } = req.params;
+    const query = `
+        SELECT t.id_adir, t.fecha, t.diagnostico
+        FROM test_adi_r t
+        WHERE t.id_paciente = ? AND t.diagnostico IS NOT NULL
         ORDER BY t.fecha DESC
     `;
     db.query(query, [id_paciente], (err, results) => {
@@ -112,4 +134,75 @@ exports.resumenUltimoTestPorPaciente = (req, res) => {
             });
         });
     });
+};
+
+// Generar PDF de resultados ADI-R
+exports.generarPdfAdir = async (req, res) => {
+    const { id_adir } = req.params;
+    try {
+        const [adir] = await db.query('SELECT * FROM test_adi_r WHERE id_adir = ?', [id_adir]);
+        if (!adir) return res.status(404).json({ message: "No existe el test." });
+        const [paciente] = await db.query('SELECT * FROM paciente WHERE id_paciente = ?', [adir.id_paciente]);
+        const [usuarioPaciente] = await db.query('SELECT * FROM usuario WHERE id_usuario = ?', [paciente.id_usuario]);
+        const [especialista] = await db.query('SELECT * FROM especialista WHERE id_especialista = ?', [adir.id_especialista]);
+        const [usuarioEspecialista] = await db.query('SELECT * FROM usuario WHERE id_usuario = ?', [especialista.id_usuario]);
+        const respuestas = await db.query(`
+            SELECT r.*, p.pregunta FROM respuesta_adi r 
+            JOIN pregunta_adi p ON p.id_pregunta = r.id_pregunta
+            WHERE r.id_adir = ?
+        `, [id_adir]);
+
+        const pdfDoc = await PDFDocument.create();
+        let page = pdfDoc.addPage([595, 842]);
+        const { width, height } = page.getSize();
+
+        const drawText = (text, x, y, size = 12) => {
+            page.drawText(text, {
+                x, y, size,
+                color: rgb(0, 0, 0)
+            });
+        };
+
+        // Logo (opcional)
+        const logoPath = path.join(__dirname, '../public/TEAlogo.png');
+        if (fs.existsSync(logoPath)) {
+            const logoBytes = fs.readFileSync(logoPath);
+            const logoImage = await pdfDoc.embedPng(logoBytes);
+            page.drawImage(logoImage, { x: 30, y: height - 80, width: 60, height: 60 });
+        }
+
+        drawText('APLICACIÓN PARA LA EVALUACIÓN DE PERSONAS CON TRASTORNO DEL ESPECTRO AUTISTA', 100, height - 50, 10);
+        drawText('ADI-R - Entrevista para el diagnóstico de Autismo - Revisada', 150, height - 70, 12);
+
+        drawText(`Nombre: ${usuarioPaciente.nombres} ${usuarioPaciente.apellidos}`, 30, height - 100);
+        drawText(`ID: ${paciente.id_paciente}`, 320, height - 100);
+        drawText(`Sexo: ${paciente.sexo === 'M' ? 'Masculino' : 'Femenino'}`, 30, height - 115);
+        drawText(`Fecha de nacimiento: ${dayjs(paciente.fecha_nacimiento).format('DD/MM/YYYY')}`, 180, height - 115);
+        drawText(`Edad cronológica: ${dayjs().diff(paciente.fecha_nacimiento, 'year')} años`, 400, height - 115);
+
+        drawText(`Entrevistador: ${usuarioEspecialista.nombres} ${usuarioEspecialista.apellidos}`, 30, height - 145);
+        drawText(`Centro: OPPTA`, 320, height - 145);
+        drawText(`Fecha de entrevista: ${dayjs(adir.fecha).format('DD/MM/YYYY')}`, 30, height - 160);
+
+        drawText(`Diagnóstico: ${adir.diagnostico || 'Pendiente'}`, 30, height - 190);
+
+        let y = height - 220;
+        for (const r of respuestas) {
+            if (y < 60) {
+                page = pdfDoc.addPage([595, 842]);
+                y = height - 40;
+            }
+            drawText(`• ${r.pregunta}`, 30, y);
+            drawText(`Calificación: ${r.calificacion}`, 450, y);
+            y -= 18;
+            drawText(`Obs.: ${r.observacion}`, 30, y, 10);
+            y -= 20;
+        }
+
+        const pdfBytes = await pdfDoc.save();
+        res.setHeader('Content-Type', 'application/pdf');
+        res.send(pdfBytes);
+    } catch (e) {
+        res.status(500).json({ message: "Error generando PDF." });
+    }
 };

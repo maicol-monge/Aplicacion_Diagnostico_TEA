@@ -23,6 +23,8 @@ import CrudTestsAdiR from "./Admin/CrudTestsAdiR";
 import CrudTestsAdos2 from "./Admin/CrudTestsAdos2";
 import PerfilEspecialista from "./Especialista/PerfilEspecialista";
 import PerfilPaciente from "./Paciente/PerfilPaciente";
+import Resultados from "./Paciente/Resultados";
+import GenerarReportes from "./Paciente/GenerarReportes";
 
 function App() {
   useEffect(() => {
@@ -73,6 +75,8 @@ function App() {
           <Route path="/consentimiento-informado" element={<ConsentimientoInformado />} />
           <Route path="/desactivar-cuenta" element={<DesactivarCuenta />} />
           <Route path="/perfil-paciente" element={<PerfilPaciente />} />
+          <Route path="/resultados" element={<Resultados />} />
+          <Route path="/reportes" element={<GenerarReportes />} />
         </Route>
         {/* Solo admin (privilegio 3) */}
         <Route element={<ProtectedRoute allowedPrivileges={[3]} />}>
