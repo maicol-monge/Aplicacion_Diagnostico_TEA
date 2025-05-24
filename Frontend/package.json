@@ -15,10 +15,12 @@
     "bootstrap": "^5.3.6",
     "bootstrap-icons": "^1.12.1",
     "chart.js": "^4.4.9",
+    "i": "^0.3.7",
     "jwt-decode": "^4.0.0",
     "react": "^19.1.0",
     "react-chartjs-2": "^5.3.0",
     "react-dom": "^19.1.0",
+    "react-router-dom": "^7.6.0",
     "sweetalert2": "^11.21.0"
   },
   "devDependencies": {

@@ -96,3 +96,91 @@ exports.resumenUltimoTestPorPaciente = (req, res) => {
         });
     });
 };
+
+exports.obtenerPreguntasTestCompleto = (req, res) => {
+    db.query(
+        `SELECT p.id_pregunta, p.pregunta, p.id_area, a.area
+         FROM pregunta_adi p
+         INNER JOIN area a ON p.id_area = a.id_area
+         ORDER BY p.id_area, p.id_pregunta`,
+        (err, data) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({ mensaje: "Error al obtener preguntas del test completo" });
+            }
+            res.json(data);
+        }
+    );
+};
+
+// Obtener preguntas por área
+exports.getPreguntasConAreas = async (req, res) => {
+    try {
+        const [data] = await db.query(`
+            SELECT p.id_pregunta, p.pregunta, p.id_area, a.area
+            FROM pregunta_adi p
+            JOIN area a ON p.id_area = a.id_area
+            ORDER BY p.id_area, p.id_pregunta
+        `);
+        res.json(data);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ mensaje: "Error al obtener preguntas con áreas" });
+    }
+};
+
+
+
+exports.crearTestAdirConRespuestas = (req, res) => {
+    const { id_paciente, respuestas } = req.body;
+
+    // Ambos deben ser nulos
+    const id_especialista = null;
+    const diagnostico = null;
+
+    if (!id_paciente || !Array.isArray(respuestas) || respuestas.length === 0) {
+        return res.status(400).json({ mensaje: "Faltan datos requeridos o respuestas" });
+    }
+
+    const fecha = new Date();
+
+    // 1. Crear el test ADIR
+    db.query(
+        `INSERT INTO test_adi_r (id_paciente, id_especialista, fecha, diagnostico) VALUES (?, ?, ?, ?)`,
+        [id_paciente, id_especialista, fecha, diagnostico],
+        (err, result) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({ error: "Error al crear test" });
+            }
+            const id_adir = result.insertId;
+
+            // 2. Guardar todas las respuestas asociadas a ese test
+            let insertCount = 0;
+            let errorOcurred = false;
+
+            respuestas.forEach((r) => {
+                const observacion = (typeof r.observacion === "string") ? r.observacion : "";
+                db.query(
+                    `INSERT INTO respuesta_adi (id_adir, id_pregunta, calificacion, observacion)
+                     VALUES (?, ?, ?, ?)`,
+                    [id_adir, r.id_pregunta, r.calificacion, observacion],
+                    (err2) => {
+                        if (errorOcurred) return;
+                        if (err2) {
+                            errorOcurred = true;
+                            console.error("Error MySQL:", err2);
+                            return res.status(500).json({ mensaje: "Error al guardar respuestas", error: err2 });
+                        }
+                        insertCount++;
+                        if (insertCount === respuestas.length) {
+                            res.status(200).json({ mensaje: "Test y respuestas guardadas correctamente", id_adir });
+                        }
+                    }
+                );
+            });
+        }
+    );
+};
+
+
