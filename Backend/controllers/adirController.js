@@ -1,4 +1,5 @@
 const db = require("../config/db");
+const { enviarCorreoDiagnostico } = require('./userController'); // Importa la función
 
 // Listar tests ADIR por paciente
 exports.listarTestsPorPaciente = (req, res) => {
@@ -51,13 +52,29 @@ exports.obtenerResumenEvaluacion = (req, res) => {
 // Guardar diagnóstico
 exports.guardarDiagnostico = (req, res) => {
     const { id_adir } = req.params;
-    const { diagnostico } = req.body;
-    const query = "UPDATE test_adi_r SET diagnostico = ? WHERE id_adir = ?";
-    db.query(query, [diagnostico, id_adir], (err, result) => {
+    const { diagnostico, id_especialista } = req.body;
+    const query = "UPDATE test_adi_r SET diagnostico = ?, id_especialista = ? WHERE id_adir = ?";
+    db.query(query, [diagnostico, id_especialista, id_adir], (err, result) => {
         if (err) {
             return res.status(500).json({ message: "Error al guardar el diagnóstico." });
         }
-        res.json({ message: "Diagnóstico guardado correctamente." });
+
+        // Buscar datos del paciente para enviar el correo
+        const pacienteQuery = `
+            SELECT u.correo, u.nombres, u.apellidos
+            FROM test_adi_r t
+            JOIN paciente p ON t.id_paciente = p.id_paciente
+            JOIN usuario u ON p.id_usuario = u.id_usuario
+            WHERE t.id_adir = ?
+        `;
+        db.query(pacienteQuery, [id_adir], (err2, results) => {
+            if (!err2 && results.length > 0) {
+                const { correo, nombres, apellidos } = results[0];
+                enviarCorreoDiagnostico(correo, nombres, apellidos, diagnostico);
+            }
+            // No importa si falla el correo, igual respondemos OK
+            res.json({ message: "Diagnóstico guardado correctamente." });
+        });
     });
 };
 
