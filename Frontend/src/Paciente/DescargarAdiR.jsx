@@ -1,8 +1,29 @@
 import React from "react";
 
 const DescargarAdiR = ({ id_adir }) => {
-  const descargarPDF = () => {
-    window.open(`http://localhost:5000/api/adir/pdf/${id_adir}`, "_blank");
+  const descargarPDF = async () => {
+    const token = localStorage.getItem("token");
+    const response = await fetch(
+      `http://localhost:5000/api/adir/pdf/${id_adir}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    if (!response.ok) {
+      alert("No se pudo descargar el PDF");
+      return;
+    }
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `ADI-R_${id_adir}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
   };
 
   return (
