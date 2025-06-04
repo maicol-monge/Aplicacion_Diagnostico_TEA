@@ -25,6 +25,11 @@ import PerfilEspecialista from "./Especialista/PerfilEspecialista";
 import PerfilPaciente from "./Paciente/PerfilPaciente";
 import Resultados from "./Paciente/Resultados";
 import GenerarReportes from "./Paciente/GenerarReportes";
+import PacientesADOS from './Especialista/PacientesADOS';
+import TestsADOSPaciente from './Especialista/TestsADOSPaciente';
+import ActividadesADOS from './Especialista/ActividadesADOS';
+import ResponderItemsAlgoritmo from "./Especialista/ResponderItemsAlgoritmo";
+import ActividadesConsulta from "./Especialista/ActividadesConsulta";
 
 function App() {
   useEffect(() => {
@@ -68,6 +73,12 @@ function App() {
           <Route path="/tests-paciente/:id_paciente" element={<ListaTestsPaciente />} />
           <Route path="/resumen-adir/:id_adir" element={<ResumenADIR />} />
           <Route path="/perfil-especialista" element={<PerfilEspecialista />} />
+          <Route path="/pacientesados" element={<PacientesADOS />} />
+          <Route path="/tests/:id_paciente" element={<TestsADOSPaciente />} />
+          <Route path="/ados/actividades/:modulo/:id_paciente" element={<ActividadesADOS />} />
+          <Route path="/ados/responder-items/:id_ados/:id_algoritmo" element={<ResponderItemsAlgoritmo />} />
+          <Route path="/ados/tests/:id_paciente" element={<TestsADOSPaciente />} />
+          <Route path="/ados/actividades-consulta/:id_ados" element={<ActividadesConsulta />} />
         </Route>
         {/* Solo pacientes (privilegio 1) */}
         <Route element={<ProtectedRoute allowedPrivileges={[1]} />}>
