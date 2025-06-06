@@ -22,7 +22,8 @@ const {
     actualizarClasificacion,
     actualizarPuntuacionComparativa,
     actualizarDiagnostico,
-    obtenerActividadesPorTest
+    obtenerActividadesPorTest,
+    obtenerGrupoPorCodificacion
 } = require("../controllers/adosController");
 const authenticateToken = require("../middlewares/auth");
 
@@ -51,5 +52,6 @@ router.put("/clasificacion/:id_ados", authenticateToken, actualizarClasificacion
 router.put("/puntuacion-comparativa/:id_ados", authenticateToken, actualizarPuntuacionComparativa);
 router.put("/diagnostico/:id_ados", authenticateToken, actualizarDiagnostico);
 router.get("/actividades-por-test/:id_ados", authenticateToken, obtenerActividadesPorTest);
+router.get("/grupo-codificacion/:id_codificacion", authenticateToken, obtenerGrupoPorCodificacion);
 
 module.exports = router;

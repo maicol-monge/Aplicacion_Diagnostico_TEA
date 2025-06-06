@@ -94,22 +94,49 @@ const ResponderItemsAlgoritmo = () => {
             console.log("Respuestas del backend:", res.data);
 
             let suma = 0;
+            let totalAS = 0;
+            let totalCRR = 0;
+            let totalC = 0;
+            let totalISR = 0;
             const algNum = parseInt(id_algoritmo, 10);
-            res.data.forEach(r => {
+
+            for (const r of res.data) {
                 // Para algoritmo 6, excluye ciertos id_codificacion
                 if (
                     algNum === 6 &&
                     [116, 117, 118, 120, 121].includes(r.id_codificacion)
                 ) {
-                    return; // los omite
+                    continue; // los omite
                 }
                 // Excluye la pregunta de selección de algoritmo solo para algoritmos 1 y 2
-                if (!([1, 2].includes(algNum) && r.id_codificacion === 1)) {
-                    const convertido = convertirPuntaje(r.puntaje, id_algoritmo, r.id_codificacion);
-                    console.log(`id_puntuacion_aplicada: ${r.id_puntuacion_aplicada}, Puntaje original: ${r.puntaje}, Puntaje convertido: ${convertido}, id_codificacion: ${r.id_codificacion}`);
-                    suma += convertido;
+                if (
+                    ([1, 2].includes(algNum) && r.id_codificacion === 1) ||
+                    ((algNum === 7 || algNum === 8) && r.id_codificacion === 125)
+                ) {
+                    continue; // omite esta codificación
                 }
-            });
+                const convertido = convertirPuntaje(r.puntaje, id_algoritmo, r.id_codificacion);
+
+                // Obtener el grupo aquí (línea 106 aprox)
+                let grupo = null;
+                try {
+                    grupo = await obtenerNombreGrupo(r.id_codificacion, token);
+                } catch (e) {
+                    grupo = null;
+                }
+                console.log(grupo);
+                // Sumar a las variables según el grupo
+                if (grupo === "comunicacion") {
+                    totalAS += convertido;
+                    totalC += convertido;
+                } else if (grupo === "interacción_social_reciproca") {
+                    totalAS += convertido;
+                    totalISR += convertido;
+                } else if (grupo === "comportamientos_restringidos_repetitivos") {
+                    totalCRR += convertido;
+                }
+                suma += convertido;
+            }
             console.log("Suma final de puntajes convertidos:", suma);
 
             let clasificacion = "Sin Clasificación";
@@ -142,7 +169,9 @@ const ResponderItemsAlgoritmo = () => {
             await Swal.fire({
                 icon: "info",
                 title: algNum === 7 || algNum === 8 ? "Rango de preocupación" : "Resultado",
-                html: `Sumatoria: <b>${suma}</b><br/>${algNum === 7 || algNum === 8 ? "Rango de preocupación" : "Clasificación"}: <b>${clasificacion}</b>`,
+                html: algNum === 6
+                    ? `Total C: <b>${totalC}</b><br/>Total ISR: <b>${totalISR}</b><br/>PUNTUACIÓN TOTAL (C+ ISR): <b>${suma}</b><br/>Clasificación: <b>${clasificacion}</b>`
+                    : `Total AS: <b>${totalAS}</b><br/>Total CRR: <b>${totalCRR}</b><br/>PUNTUACIÓN TOTAL GLOBAL (AS+ CRR): <b>${suma}</b><br/>${algNum === 7 || algNum === 8 ? "Rango de preocupación" : "Clasificación"}: <b>${clasificacion}</b>`,
                 confirmButtonText: "Aceptar"
             });
 
@@ -253,6 +282,21 @@ const ResponderItemsAlgoritmo = () => {
         }
         return "Sin Clasificación";
     };
+
+    // Puedes colocarla en un archivo utilitario o dentro de tu componente
+    async function obtenerNombreGrupo(id_codificacion, token) {
+        try {
+            const grupoResp = await axios.get(
+                `http://localhost:5000/api/ados/grupo-codificacion/${id_codificacion}`,
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            // Retorna solo el nombre del grupo
+            return grupoResp.data.grupo;
+        } catch (error) {
+            console.warn(`No se encontró grupo para id_codificacion ${id_codificacion}`);
+            return null;
+        }
+    }
 
     return (
         <div className="d-flex flex-column min-vh-100" style={{ background: COLOR_BG }}>

@@ -430,3 +430,24 @@ exports.obtenerActividadesPorTest = (req, res) => {
         res.json(results);
     });
 };
+
+exports.obtenerGrupoPorCodificacion = (req, res) => {
+    const { id_codificacion } = req.params;
+    const sql = `
+        SELECT i.grupo
+        FROM item i
+        JOIN codificacion c ON c.id_codificacion = i.id_codificacion
+        WHERE c.id_codificacion = ?
+        LIMIT 1
+    `;
+    db.query(sql, [id_codificacion], (err, results) => {
+        if (err) {
+            console.log("Error SQL:", err);
+            return res.status(500).json({ message: "Error al obtener grupo" });
+        }
+        if (results.length === 0) {
+            return res.status(404).json({ message: "No se encontró grupo para ese id_codificacion" });
+        }
+        res.json({ grupo: results[0].grupo });
+    });
+};

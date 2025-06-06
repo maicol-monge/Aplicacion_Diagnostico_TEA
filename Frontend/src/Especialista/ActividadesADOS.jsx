@@ -345,34 +345,110 @@ const ActividadesADOS = () => {
 
         // MODULO T
         if (modulo === "T") {
-            const edadMeses = calcularEdadMeses(fechaNacimiento);
-            let id_algoritmo = null;
-            if (edadMeses >= 12 && edadMeses <= 20) id_algoritmo = 7;
-            else if (edadMeses >= 21 && edadMeses <= 30) id_algoritmo = 8;
+            // 1. Pregunta de selección de algoritmo (igual que módulo 1)
+            const codRes = await axios.get("http://localhost:5000/api/ados/codificacion/125", {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const puntRes = await axios.get("http://localhost:5000/api/ados/puntuaciones-codificacion/125", {
+                headers: { Authorization: `Bearer ${token}` }
+            });
 
-            if (id_algoritmo) {
-                let nombreAlgoritmo = "Algoritmo";
-                try {
-                    const algRes = await axios.get(`http://localhost:5000/api/ados/algoritmo/${id_algoritmo}`, {
-                        headers: { Authorization: `Bearer ${token}` }
+            const pregunta = codRes.data.titulo;
+            let descripcion = codRes.data.descripcion;
+            if (descripcion && typeof descripcion === "object" && descripcion.data) {
+                descripcion = new TextDecoder().decode(new Uint8Array(descripcion.data));
+            }
+            const opciones = puntRes.data;
+
+            let html = `
+                <div style="text-align:left">
+                    <div style="background:${COLOR_ACCENT};color:#fff;padding:10px 16px;border-radius:10px 10px 0 0;font-weight:bold;font-size:1.1em;">
+                        Para continuar, debes contestar esta pregunta. Esto determinará el algoritmo a aplicar.
+                    </div>
+                    <div style="padding:18px 10px 0 10px;">
+                        <b style="color:${COLOR_PRIMARY};font-size:1.1em;">${pregunta}</b><br/>
+                        ${descripcion ? `<div style="font-size:0.97em;margin-bottom:8px;color:${COLOR_DARK};">${descripcion}</div>` : ""}
+            `;
+            opciones.forEach(op => {
+                let desc = op.descripcion;
+                if (desc && typeof desc === "object" && desc.data) {
+                    desc = new TextDecoder().decode(new Uint8Array(desc.data));
+                }
+                html += `
+                    <div style="margin-bottom:8px;">
+                        <input type="radio" id="op${op.id_puntuacion_codificacion}" name="nivel" value="${op.id_puntuacion_codificacion}" style="accent-color:${COLOR_PRIMARY};margin-right:6px;">
+                        <label for="op${op.id_puntuacion_codificacion}" style="cursor:pointer;">
+                            <span style="color:${COLOR_ACCENT};font-weight:bold;">${op.puntaje}</span> = ${desc}
+                        </label>
+                    </div>
+                `;
+            });
+            html += "</div></div>";
+
+            const result = await Swal.fire({
+                title: "Pregunta de Selección de Algoritmo",
+                html,
+                showCancelButton: false,
+                confirmButtonText: "Guardar y continuar",
+                customClass: {
+                    popup: 'swal2-border-radius'
+                },
+                width: 900,
+                willOpen: () => {
+                    document.querySelector('.swal2-popup').style.borderRadius = '18px';
+                    document.querySelector('.swal2-popup').style.maxWidth = '90vw';
+                },
+                preConfirm: () => {
+                    const nivel = document.querySelector('input[name="nivel"]:checked');
+                    if (!nivel) {
+                        Swal.showValidationMessage("Debes seleccionar una opción");
+                        return false;
+                    }
+                    return nivel.value;
+                }
+            });
+
+            if (result.isConfirmed) {
+                const id_puntuacion_codificacion = parseInt(result.value, 10);
+                await axios.post("http://localhost:5000/api/ados/responder-codificacion", {
+                    id_ados: id_ados_final,
+                    id_puntuacion_codificacion
+                }, { headers: { Authorization: `Bearer ${token}` } });
+
+                // Detecta el algoritmo según el puntaje de la opción seleccionada
+                const opcionSeleccionada = opciones.find(op => op.id_puntuacion_codificacion === id_puntuacion_codificacion);
+                const puntaje = opcionSeleccionada ? opcionSeleccionada.puntaje : null;
+
+                // 2. Luego, valida la edad como ya lo hacías
+                const edadMeses = calcularEdadMeses(fechaNacimiento);
+                let id_algoritmo = null;
+                if (edadMeses >= 12 && edadMeses <= 20) id_algoritmo = 7;
+                else if (edadMeses >= 21 && edadMeses <= 30) id_algoritmo = 8;
+
+                if (id_algoritmo) {
+                    let nombreAlgoritmo = "Algoritmo";
+                    try {
+                        const algRes = await axios.get(`http://localhost:5000/api/ados/algoritmo/${id_algoritmo}`, {
+                            headers: { Authorization: `Bearer ${token}` }
+                        });
+                        nombreAlgoritmo = algRes.data.titulo || nombreAlgoritmo;
+                    } catch (e) {}
+                    await Swal.fire({
+                        icon: "info",
+                        title: "Algoritmo seleccionado",
+                        html: `
+                            <div style="font-size:1.1em;">
+                                Se aplicará el <b style="color:${COLOR_PRIMARY};">${nombreAlgoritmo}</b> según la edad del paciente.<br/><br/>
+                                Haz clic en <b>Continuar</b> para responder las preguntas del algoritmo.
+                            </div>
+                        `,
+                        confirmButtonText: "Continuar",
+                        customClass: { popup: 'swal2-border-radius' }
                     });
-                    nombreAlgoritmo = algRes.data.titulo || nombreAlgoritmo;
-                } catch (e) {}
-                await Swal.fire({
-                    icon: "info",
-                    title: "Algoritmo seleccionado",
-                    html: `
-                        <div style="font-size:1.1em;">
-                            Se aplicará el <b style="color:${COLOR_PRIMARY};">${nombreAlgoritmo}</b> según la edad del paciente.<br/><br/>
-                            Haz clic en <b>Continuar</b> para responder las preguntas del algoritmo.
-                        </div>
-                    `,
-                    confirmButtonText: "Continuar",
-                    customClass: { popup: 'swal2-border-radius' }
-                });
-                navigate(`/ados/responder-items/${id_ados_final}/${id_algoritmo}`);
-            } else {
-                Swal.fire("No se puede elegir algoritmo", "La edad no cumple los requisitos para este módulo.", "warning");
+                    navigate(`/ados/responder-items/${id_ados_final}/${id_algoritmo}`);
+                } else {
+                    Swal.fire("No se puede elegir algoritmo", "La edad no cumple los requisitos para este módulo.", "warning");
+                }
             }
             return;
         }
