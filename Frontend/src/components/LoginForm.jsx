@@ -7,6 +7,8 @@ const LoginForm = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
+    const [showForgot, setShowForgot] = useState(false);
+    const [forgotEmail, setForgotEmail] = useState("");
     const navigate = useNavigate();
 
     const handleLogin = () => {
@@ -34,16 +36,17 @@ const LoginForm = () => {
                         return;
                     }
                     // Login normal: guarda token y datos de usuario
-                    const { id_usuario, nombres, apellidos, correo, privilegio, imagen } = data.user;
-                    localStorage.setItem("user", JSON.stringify({ id_usuario, nombres, apellidos, correo, privilegio, imagen }));
+                    const { id_usuario, nombres, apellidos, direccion, telefono, correo, privilegio, imagen } = data.user;
+                    localStorage.setItem("user", JSON.stringify({ id_usuario, nombres, apellidos, direccion, telefono, correo, privilegio, imagen }));
                     localStorage.setItem("token", data.token); // Guarda el token para futuras peticiones
 
                     if (privilegio === 0) {
                         navigate("/home_espe");
                     } else if (privilegio === 1) {
                         navigate("/home_paciente");
-                    }
-                    else {
+                    }else if (privilegio === 3) {
+                        navigate("/admin/home"); 
+                    }else {
                         navigate("/");
                     }
                 })
@@ -63,6 +66,29 @@ const LoginForm = () => {
                 icon: "error",
                 showConfirmButton: false,
                 timer: 1500
+            });
+        }
+    };
+
+    const handleForgotPassword = async (e) => {
+        e.preventDefault();
+        if (!forgotEmail) return;
+        try {
+            await axios.post("http://localhost:5000/api/users/recuperar-contrasena", { correo: forgotEmail });
+            Swal.fire({
+                title: "¡Revisa tu correo!",
+                text: "Si el correo está registrado, recibirás una nueva contraseña.",
+                icon: "success",
+                confirmButtonText: "Aceptar"
+            });
+            setShowForgot(false);
+            setForgotEmail("");
+        } catch (err) {
+            Swal.fire({
+                title: "Error",
+                text: err.response?.data?.message || "No se pudo enviar el correo.",
+                icon: "error",
+                confirmButtonText: "Aceptar"
             });
         }
     };
@@ -111,6 +137,48 @@ const LoginForm = () => {
                     >
                         Acceder
                     </button>
+                    <div className="text-center mt-3">
+                        <button
+                            className="btn btn-link p-0"
+                            style={{ color: "#f3859e", textDecoration: "underline" }}
+                            onClick={() => setShowForgot(true)}
+                        >
+                            ¿Olvidaste tu contraseña?
+                        </button>
+                    </div>
+                    {/* Modal simple */}
+                    {showForgot && (
+                        <div className="modal d-block" tabIndex="-1" style={{ background: "rgba(0,0,0,0.3)" }}>
+                            <div className="modal-dialog modal-dialog-centered">
+                                <div className="modal-content">
+                                    <div className="modal-header">
+                                        <h5 className="modal-title">Recuperar contraseña</h5>
+                                        <button type="button" className="btn-close" onClick={() => setShowForgot(false)}></button>
+                                    </div>
+                                    <form onSubmit={handleForgotPassword}>
+                                        <div className="modal-body">
+                                            <label>Correo electrónico</label>
+                                            <input
+                                                type="email"
+                                                className="form-control"
+                                                value={forgotEmail}
+                                                onChange={e => setForgotEmail(e.target.value)}
+                                                required
+                                            />
+                                        </div>
+                                        <div className="modal-footer">
+                                            <button type="button" className="btn btn-secondary" onClick={() => setShowForgot(false)}>
+                                                Cancelar
+                                            </button>
+                                            <button type="submit" className="btn btn-primary" style={{ background: "#457b9d" }}>
+                                                Enviar
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
