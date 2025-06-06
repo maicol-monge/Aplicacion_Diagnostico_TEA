@@ -1,16 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import Swal from 'sweetalert2';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import Swal from "sweetalert2";
 import Navbar from '../components/Navbar_espe';
 import Footer from '../components/Footer';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link } from "react-router-dom";
 
 const COLOR_PRIMARY = "#457b9d";
 const COLOR_DARK = "#1d3557";
 const COLOR_ACCENT = "#f3859e";
 const COLOR_BG = "#a8dadc";
 
-const Pacientes = () => {
+const PacientesADOS = () => {
     const [pacientes, setPacientes] = useState([]);
     const [busqueda, setBusqueda] = useState('');
     const [filtroSexo, setFiltroSexo] = useState('');
@@ -21,7 +21,8 @@ const Pacientes = () => {
         const fetchPacientes = async () => {
             try {
                 const token = localStorage.getItem("token");
-                const response = await axios.get('http://localhost:5000/api/users/pacientes', {
+                console.log("TOKEN ENVIADO:", token);
+                const response = await axios.get('http://localhost:5000/api/ados/pacientes', {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setPacientes(response.data);
@@ -63,14 +64,14 @@ const Pacientes = () => {
                         color: "#fff",
                         fontWeight: "bold"
                     }}
-                    onClick={() => navigate('/home_espe')}
+                    onClick={() => navigate(-1)}
                 >
                     Volver
                 </button>
                 <div className="card shadow mb-4" style={{ borderRadius: 18 }}>
                     <div className="card-body">
                         <h2 className="text-center mb-4" style={{ color: COLOR_PRIMARY, fontWeight: "bold" }}>
-                            Listado de Pacientes
+                            Listado de Pacientes ADOS-2
                         </h2>
                         <div className="row g-3 mb-4 justify-content-center">
                             <div className="col-12 col-md-4">
@@ -125,7 +126,7 @@ const Pacientes = () => {
                                             <td>{p.fecha_nacimiento ? new Date(p.fecha_nacimiento).toLocaleDateString() : ''}</td>
                                             <td>
                                                 <Link
-                                                    to={`/tests-paciente/${p.id_paciente}`}
+                                                    to={`/tests/${p.id_paciente}`}
                                                     className="btn btn-sm"
                                                     style={{
                                                         background: COLOR_ACCENT,
@@ -133,7 +134,7 @@ const Pacientes = () => {
                                                         fontWeight: "bold"
                                                     }}
                                                 >
-                                                    Ver Tests ADIR
+                                                    Ver Tests ADOS-2
                                                 </Link>
                                             </td>
                                         </tr>
@@ -154,4 +155,4 @@ const Pacientes = () => {
     );
 };
 
-export default Pacientes;
+export default PacientesADOS;

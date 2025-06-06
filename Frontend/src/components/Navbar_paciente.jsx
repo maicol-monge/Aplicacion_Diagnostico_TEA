@@ -86,28 +86,6 @@ const Navbar = () => {
                             color: "#fff",
                             fontWeight: "bold"
                         }}
-                        onClick={() => navigate("/evaluacion-adir")}
-                    >
-                        Evaluación ADI-R
-                    </button>
-                    <button
-                        className="btn btn-sm ms-2 d-none d-lg-inline"
-                        style={{
-                            background: COLOR_DARK,
-                            color: "#fff",
-                            fontWeight: "bold"
-                        }}
-                        onClick={() => navigate("/reportes")}
-                    >
-                        Reportes
-                    </button>
-                    <button
-                        className="btn btn-sm ms-2 d-none d-lg-inline"
-                        style={{
-                            background: COLOR_DARK,
-                            color: "#fff",
-                            fontWeight: "bold"
-                        }}
                         onClick={() => navigate("/resultados")}
                     >
                         Resultados
@@ -141,40 +119,7 @@ const Navbar = () => {
                                 Inicio
                             </button>
                         </li>
-                        {/* Botón Evaluación ADI-R solo visible en menú sandwich */}
-                        <li className="nav-item d-lg-none mb-2">
-                            <button
-                                className="btn btn-sm w-100"
-                                style={{
-                                    background: COLOR_DARK,
-                                    color: "#fff",
-                                    fontWeight: "bold"
-                                }}
-                                onClick={() => {
-                                    setShowMenu(false);
-                                    navigate("/evaluacion-adir");
-                                }}
-                            >
-                                Evaluación ADI-R
-                            </button>
-                        </li>
-                        {/* Botón Reportes solo visible en menú sandwich */}
-                        <li className="nav-item d-lg-none mb-2">
-                            <button
-                                className="btn btn-sm w-100"
-                                style={{
-                                    background: COLOR_DARK,
-                                    color: "#fff",
-                                    fontWeight: "bold"
-                                }}
-                                onClick={() => {
-                                    setShowMenu(false);
-                                    navigate("/reportes");
-                                }}
-                            >
-                                Reportes
-                            </button>
-                        </li>
+                        
                         {/* Botón Resultados solo visible en menú sandwich */}
                         <li className="nav-item d-lg-none mb-2">
                             <button

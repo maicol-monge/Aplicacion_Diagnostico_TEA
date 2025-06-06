@@ -99,7 +99,7 @@ const Navbar = () => {
                         }}
                         onClick={() => navigate("/pacientes")}
                     >
-                        Revisión ADI-R
+                        Evaluación ADI-R
                     </button>
                     <button
                         className="btn btn-sm ms-2 d-none d-lg-inline"
@@ -181,7 +181,7 @@ const Navbar = () => {
                                     navigate("/pacientes");
                                 }}
                             >
-                                Revisión ADI-R
+                                Evaluación ADI-R
                             </button>
                         </li>
                         <li className="nav-item d-lg-none mb-2">
