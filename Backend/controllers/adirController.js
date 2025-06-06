@@ -408,6 +408,7 @@ function enviarCorreoEvaluacionEnviada(destinatario, nombre, apellidos) {
     });
 }
 
+
 // Listar preguntas ADI-R con área
 exports.obtenerPreguntasConAreas = (req, res) => {
     db.query(
