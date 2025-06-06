@@ -37,7 +37,7 @@ function enviarCorreoDiagnostico(destinatario, nombre, apellidos, diagnostico) {
 exports.listarTestsPorPaciente = (req, res) => {
     const { id_paciente } = req.params;
     const query = `
-        SELECT t.id_adir, t.fecha, t.diagnostico
+        SELECT t.id_adir, t.fecha, t.diagnostico, t.estado
         FROM test_adi_r t
         WHERE t.id_paciente = ?
         ORDER BY t.fecha DESC
@@ -67,10 +67,26 @@ exports.listarTestsConDiagnosticoPorPaciente = (req, res) => {
 exports.obtenerResumenEvaluacion = (req, res) => {
     const { id_adir } = req.params;
     const testQuery = `
-        SELECT t.id_adir, t.fecha, t.diagnostico, p.id_paciente, u.nombres, u.apellidos, p.sexo, p.fecha_nacimiento
+        SELECT 
+            t.id_adir, 
+            t.fecha AS fecha_entrevista, 
+            t.diagnostico, 
+            t.algoritmo,
+            t.tipo_sujeto,
+            t.estado,
+            t.id_especialista,
+            p.id_paciente, 
+            u.nombres, 
+            u.apellidos, 
+            p.sexo, 
+            p.fecha_nacimiento,
+            ue.nombres AS especialista_nombre,
+            ue.apellidos AS especialista_apellidos
         FROM test_adi_r t
         JOIN paciente p ON t.id_paciente = p.id_paciente
         JOIN usuario u ON p.id_usuario = u.id_usuario
+        LEFT JOIN especialista e ON t.id_especialista = e.id_especialista
+        LEFT JOIN usuario ue ON e.id_usuario = ue.id_usuario
         WHERE t.id_adir = ?
     `;
     db.query(testQuery, [id_adir], (err, testResults) => {
@@ -78,7 +94,7 @@ exports.obtenerResumenEvaluacion = (req, res) => {
             return res.status(404).json({ message: "Test no encontrado." });
         }
         const respuestasQuery = `
-            SELECT r.id_pregunta, a.area, q.pregunta, r.calificacion, r.observacion
+            SELECT r.id_pregunta, a.area, q.pregunta, r.codigo, r.observacion
             FROM respuesta_adi r
             JOIN pregunta_adi q ON r.id_pregunta = q.id_pregunta
             JOIN area a ON q.id_area = a.id_area
@@ -88,8 +104,15 @@ exports.obtenerResumenEvaluacion = (req, res) => {
             if (err2) {
                 return res.status(500).json({ message: "Error al obtener respuestas." });
             }
+            // Unifica nombre del especialista si existe
+            const test = testResults[0];
+            test.especialista = test.especialista_nombre
+                ? `${test.especialista_nombre} ${test.especialista_apellidos}`
+                : "";
+            delete test.especialista_nombre;
+            delete test.especialista_apellidos;
             res.json({
-                test: testResults[0],
+                test,
                 respuestas
             });
         });
@@ -278,6 +301,52 @@ exports.crearTestAdir = (req, res) => {
     );
 };
 
+// Crear un nuevo test_adi_r SOLO por especialista y si el paciente cumple condiciones
+exports.crearTestAdir = (req, res) => {
+    const { id_paciente, id_especialista, algoritmo, tipo_sujeto, edad_mental_confirmada } = req.body;
+
+    if (!id_paciente || !id_especialista || !edad_mental_confirmada) {
+        return res.status(400).json({ message: "Faltan datos obligatorios." });
+    }
+    if (!edad_mental_confirmada) {
+        return res.status(400).json({ message: "Debe confirmar que el paciente tiene al menos 2 años de edad mental." });
+    }
+
+    db.query(
+        "SELECT terminos_privacida, filtro_dsm_5 FROM paciente WHERE id_paciente = ?",
+        [id_paciente],
+        (err, rows) => {
+            if (err || rows.length === 0) {
+                return res.status(404).json({ message: "Paciente no encontrado." });
+            }
+            const { terminos_privacida, filtro_dsm_5 } = rows[0];
+            if (terminos_privacida !== 1 || filtro_dsm_5 !== 1) {
+                return res.status(403).json({ message: "El paciente no cumple los requisitos para la evaluación." });
+            }
+
+            db.query(
+                "SELECT * FROM especialista WHERE id_especialista = ?",
+                [id_especialista],
+                (err2, rows2) => {
+                    if (err2 || rows2.length === 0) {
+                        return res.status(403).json({ message: "Especialista no válido." });
+                    }
+                    const fecha = new Date();
+                    db.query(
+                        `INSERT INTO test_adi_r (id_paciente, id_especialista, fecha, algoritmo, tipo_sujeto, estado)
+                         VALUES (?, ?, ?, ?, ?, 0)`,
+                        [id_paciente, id_especialista, fecha, algoritmo || 0, tipo_sujeto || ""],
+                        (err3, result) => {
+                            if (err3) return res.status(500).json({ message: "Error al crear test." });
+                            res.json({ id_adir: result.insertId });
+                        }
+                    );
+                }
+            );
+        }
+    );
+};
+
 // Guardar respuestas ADI-R
 exports.guardarRespuestasAdir = (req, res) => {
     const { id_adir } = req.params;
@@ -338,3 +407,190 @@ function enviarCorreoEvaluacionEnviada(destinatario, nombre, apellidos) {
         }
     });
 }
+
+// Listar preguntas ADI-R con área
+exports.obtenerPreguntasConAreas = (req, res) => {
+    db.query(
+        `SELECT p.id_pregunta, p.pregunta, p.id_area, a.area
+         FROM pregunta_adi p
+         JOIN area a ON p.id_area = a.id_area
+         ORDER BY a.id_area, p.id_pregunta`,
+        (err, results) => {
+            if (err) return res.status(500).json({ message: "Error al obtener preguntas." });
+            res.json(results);
+        }
+    );
+};
+
+// Devuelve los códigos válidos para cada pregunta
+exports.obtenerCodigosPorPregunta = (req, res) => {
+    db.query(
+        `SELECT c.id_codigo, c.codigo, c.id_pregunta
+         FROM codigo c`,
+        (err, results) => {
+            if (err) return res.status(500).json({ message: "Error al obtener códigos." });
+            // Agrupa por id_pregunta
+            const codigosPorPregunta = {};
+            results.forEach(row => {
+                if (!codigosPorPregunta[row.id_pregunta]) codigosPorPregunta[row.id_pregunta] = [];
+                codigosPorPregunta[row.id_pregunta].push({ id_codigo: row.id_codigo, codigo: row.codigo });
+            });
+            res.json(codigosPorPregunta);
+        }
+    );
+};
+
+// Listar preguntas y respuestas previas para un test
+exports.obtenerPreguntasConRespuestas = (req, res) => {
+    const { id_adir } = req.params;
+    db.query(
+        `SELECT p.id_pregunta, p.pregunta, p.id_area, a.area,
+                r.codigo as codigo_respuesta, r.observacion
+         FROM pregunta_adi p
+         JOIN area a ON p.id_area = a.id_area
+         LEFT JOIN respuesta_adi r ON r.id_pregunta = p.id_pregunta AND r.id_adir = ?
+         ORDER BY a.id_area, p.id_pregunta`,
+        [id_adir],
+        (err, results) => {
+            if (err) return res.status(500).json({ message: "Error al obtener preguntas y respuestas." });
+            // Agrupa por área y arma estructura
+            const preguntas = [];
+            const respuestas = {};
+            results.forEach(row => {
+                preguntas.push(row);
+                if (row.codigo_respuesta !== null) {
+                    respuestas[row.id_pregunta] = {
+                        codigo: row.codigo_respuesta,
+                        observacion: row.observacion
+                    };
+                }
+            });
+
+            // --- NUEVO: obtener datos del paciente ---
+            db.query(
+                `SELECT u.nombres, u.apellidos, p.sexo, p.fecha_nacimiento
+                 FROM test_adi_r t
+                 JOIN paciente p ON t.id_paciente = p.id_paciente
+                 JOIN usuario u ON p.id_usuario = u.id_usuario
+                 WHERE t.id_adir = ?`,
+                [id_adir],
+                (err2, pacienteRows) => {
+                    if (err2 || pacienteRows.length === 0) {
+                        // Si falla, igual responde preguntas y respuestas
+                        return res.json({ preguntas, respuestas });
+                    }
+                    res.json({
+                        preguntas,
+                        respuestas,
+                        paciente: pacienteRows[0]
+                    });
+                }
+            );
+        }
+    );
+};
+
+// Guardar o actualizar respuesta
+exports.guardarRespuestaAdir = (req, res) => {
+    const { id_adir, id_pregunta, codigo, observacion } = req.body;
+    // Si ya existe, actualiza. Si no, inserta.
+    db.query(
+        "SELECT id_respuesta FROM respuesta_adi WHERE id_adir = ? AND id_pregunta = ?",
+        [id_adir, id_pregunta],
+        (err, rows) => {
+            if (err) return res.status(500).json({ message: "Error al buscar respuesta." });
+            if (rows.length > 0) {
+                // Actualizar
+                db.query(
+                    "UPDATE respuesta_adi SET codigo = ?, observacion = ? WHERE id_adir = ? AND id_pregunta = ?",
+                    [codigo, observacion, id_adir, id_pregunta],
+                    (err2) => {
+                        if (err2) return res.status(500).json({ message: "Error al actualizar respuesta." });
+                        res.json({ message: "Respuesta actualizada." });
+                    }
+                );
+            } else {
+                // Insertar
+                db.query(
+                    "INSERT INTO respuesta_adi (id_adir, id_pregunta, codigo, observacion) VALUES (?, ?, ?, ?)",
+                    [id_adir, id_pregunta, codigo, observacion],
+                    (err2) => {
+                        if (err2) return res.status(500).json({ message: "Error al guardar respuesta." });
+                        res.json({ message: "Respuesta guardada." });
+                    }
+                );
+            }
+        }
+    );
+};
+
+// Obtener solo el id_paciente a partir de un id_adir
+exports.obtenerIdPacientePorAdir = (req, res) => {
+    const { id_adir } = req.params;
+    db.query(
+        "SELECT id_paciente FROM test_adi_r WHERE id_adir = ?",
+        [id_adir],
+        (err, results) => {
+            if (err) return res.status(500).json({ message: "Error al obtener id_paciente." });
+            if (results.length === 0) return res.status(404).json({ message: "Test no encontrado." });
+            res.json({ id_paciente: results[0].id_paciente });
+        }
+    );
+};
+
+// Determinar y actualizar tipo de sujeto en test_adi_r
+exports.determinarYActualizarTipoSujeto = (req, res) => {
+    const { id_adir } = req.params;
+    // Obtener el código de la pregunta 30 para este test
+    db.query(
+        `SELECT codigo FROM respuesta_adi WHERE id_adir = ? AND id_pregunta = 30 LIMIT 1`,
+        [id_adir],
+        (err, rows) => {
+            if (err) return res.status(500).json({ message: "Error al consultar código de pregunta 30." });
+            if (!rows.length) return res.status(404).json({ message: "No existe respuesta para la pregunta 30." });
+
+            // Conversión algorítmica
+            let tipo_sujeto = "no-verbal";
+            const codigo = Number(rows[0].codigo);
+            if (codigo === 0) tipo_sujeto = "verbal";
+            else if (codigo === 1 || codigo === 2) tipo_sujeto = "no-verbal";
+
+            // Actualizar el campo tipo_sujeto en test_adi_r
+            db.query(
+                `UPDATE test_adi_r SET tipo_sujeto = ? WHERE id_adir = ?`,
+                [tipo_sujeto, id_adir],
+                (err2) => {
+                    if (err2) return res.status(500).json({ message: "Error al actualizar tipo de sujeto." });
+                    res.json({ tipo_sujeto });
+                }
+            );
+        }
+    );
+};
+
+// Obtener la fecha de la entrevista (fecha del test) por id_adir
+exports.obtenerFechaEntrevistaPorAdir = (req, res) => {
+    const { id_adir } = req.params;
+    db.query(
+        "SELECT fecha FROM test_adi_r WHERE id_adir = ?",
+        [id_adir],
+        (err, results) => {
+            if (err) return res.status(500).json({ message: "Error al obtener la fecha de la entrevista." });
+            if (results.length === 0) return res.status(404).json({ message: "Test no encontrado." });
+            res.json({ fecha_entrevista: results[0].fecha });
+        }
+    );
+};
+
+// Guardar o actualizar algoritmo, diagnóstico y estado del test_adi_r
+exports.guardarDiagnosticoFinal = (req, res) => {
+    const { id_adir } = req.params;
+    const { algoritmo, diagnostico, estado } = req.body;
+    const query = "UPDATE test_adi_r SET algoritmo = ?, diagnostico = ?, estado = ? WHERE id_adir = ?";
+    db.query(query, [algoritmo, diagnostico, estado, id_adir], (err, result) => {
+        if (err) {
+            return res.status(500).json({ message: "Error al guardar el diagnóstico final." });
+        }
+        res.json({ message: "Diagnóstico final guardado correctamente." });
+    });
+};

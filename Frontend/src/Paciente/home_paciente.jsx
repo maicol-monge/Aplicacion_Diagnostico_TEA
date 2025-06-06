@@ -82,20 +82,7 @@ const Home = () => {
 
     // Opciones del home
     const opciones = [
-        {
-            titulo: "Evaluación ADI-R",
-            color: COLOR_PRIMARY,
-            icon: icons.adir,
-            onClick: () => navigate("/evaluacion-adir"),
-            descripcion: "Realiza la evaluación ADI-R para diagnóstico TEA."
-        },
-        {
-            titulo: "Generación de Reportes",
-            color: COLOR_DARK,
-            icon: icons.reportes,
-            onClick: () => navigate("/reportes"),
-            descripcion: "Genera y descarga tus reportes clínicos."
-        },
+        
         {
             titulo: "Resultados",
             color: COLOR_ACCENT,
