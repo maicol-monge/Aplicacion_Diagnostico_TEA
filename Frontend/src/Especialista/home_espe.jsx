@@ -81,7 +81,7 @@ const Home = () => {
             titulo: "Evaluación ADOS-2",
             color: COLOR_DARK,
             icon: icons.adir,
-            onClick: () => navigate("/evaluacion-ados"),
+            onClick: () => navigate("/pacientesados"),
             descripcion: "Realiza una nueva evaluación ADOS-2."
         },
         {

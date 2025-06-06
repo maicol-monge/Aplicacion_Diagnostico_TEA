@@ -24,9 +24,22 @@ import CrudTestsAdos2 from "./Admin/CrudTestsAdos2";
 import PerfilEspecialista from "./Especialista/PerfilEspecialista";
 import PerfilPaciente from "./Paciente/PerfilPaciente";
 import Resultados from "./Paciente/Resultados";
+
+import GenerarReportes from "./Paciente/GenerarReportes";
+
+import PacientesADOS from './Especialista/PacientesADOS';
+import TestsADOSPaciente from './Especialista/TestsADOSPaciente';
+import ActividadesADOS from './Especialista/ActividadesADOS';
+import ResponderItemsAlgoritmo from "./Especialista/ResponderItemsAlgoritmo";
+import ActividadesConsulta from "./Especialista/ActividadesConsulta";
+
+import EvaluacionAdir from "./Paciente/EvaluacionAdir";
+
 import CrearAdir from "./Evaluacion/CrearAdir";
 import ResponderAdir from "./Evaluacion/ResponderAdir";
 import Algoritmo from "./Evaluacion/Algoritmo";
+
+
 
 function App() {
   useEffect(() => {
@@ -71,8 +84,17 @@ function App() {
           <Route path="/resumen-adir/:id_adir" element={<ResumenADIR />} />
           <Route path="/crear-adir/:id_paciente" element={<CrearAdir />} /> {/* NUEVA RUTA */}
           <Route path="/perfil-especialista" element={<PerfilEspecialista />} />
+
+          <Route path="/pacientesados" element={<PacientesADOS />} />
+          <Route path="/tests/:id_paciente" element={<TestsADOSPaciente />} />
+          <Route path="/ados/actividades/:modulo/:id_paciente" element={<ActividadesADOS />} />
+          <Route path="/ados/responder-items/:id_ados/:id_algoritmo" element={<ResponderItemsAlgoritmo />} />
+          <Route path="/ados/tests/:id_paciente" element={<TestsADOSPaciente />} />
+          <Route path="/ados/actividades-consulta/:id_ados" element={<ActividadesConsulta />} />
+
           <Route path="/responder-adir/:id_adir" element={<ResponderAdir />} />
           <Route path="/algoritmo/:id_adir" element={<Algoritmo />} />
+
         </Route>
         {/* Solo pacientes (privilegio 1) */}
         <Route element={<ProtectedRoute allowedPrivileges={[1]} />}>
