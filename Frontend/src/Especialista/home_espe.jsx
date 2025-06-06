@@ -71,11 +71,11 @@ const Home = () => {
             descripcion: "Registra nuevos usuarios en la plataforma."
         },
         {
-            titulo: "Revisión Evaluaciones ADI-R",
+            titulo: "Evaluación ADI-R",
             color: COLOR_PRIMARY,
             icon: icons.revision,
             onClick: () => navigate("/pacientes"),
-            descripcion: "Revisa evaluaciones ADI-R realizadas por pacientes y emite diagnóstico."
+            descripcion: "Realiza una nueva evaluación ADI-R."
         },
         {
             titulo: "Evaluación ADOS-2",

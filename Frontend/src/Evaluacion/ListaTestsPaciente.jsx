@@ -38,10 +38,23 @@ const ListaTestsPaciente = () => {
                         color: "#fff",
                         fontWeight: "bold"
                     }}
-                    onClick={() => navigate(-1)}
+                    onClick={() => navigate('/pacientes')}
                 >
                     Volver
                 </button>
+                <div className="d-flex justify-content-end mb-3">
+                    <Link
+                        to={`/crear-adir/${id_paciente}`}
+                        className="btn"
+                        style={{
+                            background: COLOR_ACCENT,
+                            color: "#fff",
+                            fontWeight: "bold"
+                        }}
+                    >
+                        Nueva Evaluación ADI-R
+                    </Link>
+                </div>
                 <div className="card shadow" style={{ borderRadius: 18 }}>
                     <div className="card-body">
                         <h2 className="text-center mb-4" style={{ color: COLOR_PRIMARY, fontWeight: "bold" }}>
@@ -67,17 +80,31 @@ const ListaTestsPaciente = () => {
                                                     {test.diagnostico || <span className="text-muted">Sin diagnóstico</span>}
                                                 </td>
                                                 <td>
-                                                    <Link
-                                                        to={`/resumen-adir/${test.id_adir}`}
-                                                        className="btn btn-sm"
-                                                        style={{
-                                                            background: COLOR_ACCENT,
-                                                            color: "#fff",
-                                                            fontWeight: "bold"
-                                                        }}
-                                                    >
-                                                        Ver Resumen
-                                                    </Link>
+                                                    {test.estado === 0 ? (
+                                                        <Link
+                                                            to={`/responder-adir/${test.id_adir}`}
+                                                            className="btn btn-sm"
+                                                            style={{
+                                                                background: COLOR_PRIMARY,
+                                                                color: "#fff",
+                                                                fontWeight: "bold"
+                                                            }}
+                                                        >
+                                                            Reanudar
+                                                        </Link>
+                                                    ) : (
+                                                        <Link
+                                                            to={`/resumen-adir/${test.id_adir}`}
+                                                            className="btn btn-sm"
+                                                            style={{
+                                                                background: COLOR_ACCENT,
+                                                                color: "#fff",
+                                                                fontWeight: "bold"
+                                                            }}
+                                                        >
+                                                            Ver Resumen
+                                                        </Link>
+                                                    )}
                                                 </td>
                                             </tr>
                                         ))

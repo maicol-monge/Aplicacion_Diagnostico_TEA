@@ -63,7 +63,7 @@ const Pacientes = () => {
                         color: "#fff",
                         fontWeight: "bold"
                     }}
-                    onClick={() => navigate(-1)}
+                    onClick={() => navigate('/home_espe')}
                 >
                     Volver
                 </button>
