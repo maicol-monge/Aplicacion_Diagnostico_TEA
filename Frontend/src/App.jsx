@@ -25,7 +25,6 @@ import PerfilEspecialista from "./Especialista/PerfilEspecialista";
 import PerfilPaciente from "./Paciente/PerfilPaciente";
 import Resultados from "./Paciente/Resultados";
 
-import GenerarReportes from "./Paciente/GenerarReportes";
 
 import PacientesADOS from './Especialista/PacientesADOS';
 import TestsADOSPaciente from './Especialista/TestsADOSPaciente';
@@ -33,7 +32,7 @@ import ActividadesADOS from './Especialista/ActividadesADOS';
 import ResponderItemsAlgoritmo from "./Especialista/ResponderItemsAlgoritmo";
 import ActividadesConsulta from "./Especialista/ActividadesConsulta";
 
-import EvaluacionAdir from "./Paciente/EvaluacionAdir";
+
 
 import CrearAdir from "./Evaluacion/CrearAdir";
 import ResponderAdir from "./Evaluacion/ResponderAdir";
