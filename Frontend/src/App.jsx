@@ -25,11 +25,15 @@ import PerfilEspecialista from "./Especialista/PerfilEspecialista";
 import PerfilPaciente from "./Paciente/PerfilPaciente";
 import Resultados from "./Paciente/Resultados";
 import GenerarReportes from "./Paciente/GenerarReportes";
+
 import PacientesADOS from './Especialista/PacientesADOS';
 import TestsADOSPaciente from './Especialista/TestsADOSPaciente';
 import ActividadesADOS from './Especialista/ActividadesADOS';
 import ResponderItemsAlgoritmo from "./Especialista/ResponderItemsAlgoritmo";
 import ActividadesConsulta from "./Especialista/ActividadesConsulta";
+
+import EvaluacionAdir from "./Paciente/EvaluacionAdir";
+
 
 function App() {
   useEffect(() => {
@@ -88,6 +92,7 @@ function App() {
           <Route path="/perfil-paciente" element={<PerfilPaciente />} />
           <Route path="/resultados" element={<Resultados />} />
           <Route path="/reportes" element={<GenerarReportes />} />
+          <Route path="/evaluacion-adir" element={<EvaluacionAdir />} />
         </Route>
         {/* Solo admin (privilegio 3) */}
         <Route element={<ProtectedRoute allowedPrivileges={[3]} />}>
