@@ -3,64 +3,115 @@ import html2pdf from "html2pdf.js";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar_paciente";
 
-export default function ReporteModulo3() {
+export default function ReporteModulo3({ datos }) {
   const reportRef = useRef();
   const COLOR_BG = "#f8f9fa";
 
-  // -------------------------
-  // Datos personales
-  // -------------------------
-  const nombres = "José Mario";
-  const apellidos = "Morales Quezada";
-  const fecha = "6 de junio de 2025";
-  const telefono = "7907-6010";
-  const especialista = "Lic. Juan Acevedo";
+  // Función para formatear la fecha a dd-MM-yyyy
+  const formatFecha = (fechaStr) => {
+    if (!fechaStr) return "";
+    const d = new Date(fechaStr);
+    if (isNaN(d)) return "";
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
 
-  // -------------------------
-  // Afectación Social (AS)
-  // -------------------------
-  const narracionSucesos = 0; // (A-7)
-  const conversacion = 0; // (A-8)
-  const gestos = 0; // (A-9)
-  const contactoVisual = 0; // (B-1)
-  const expresionesFaciales = 0; // (B-2)
-  const disfruteCompartido = 0; // (B-4)
-  const caracteristicasIniciaciones = 0; // (B-7)
-  const calidadRespuestaSocial = 0; // (B-9)
-  const cantidadComunicacionSocial = 0; // (B-10)
-  const calidadRelacion = 0; // (B-11)
+  // Función para descripción de nivel de síntomas
+  const getDescripcionComparativa = (punt) => {
+    const val = Number(punt);
+    if ([10, 9, 8].includes(val)) {
+      return "Nivel alto de síntomas asociados del espectro autista en comparación con niños que tienen TEA y que tienen la misma edad cronológica y nivel de lenguaje. Corresponde a una clasificación del ADOS-2 de autismo";
+    }
+    if ([7, 6, 5].includes(val)) {
+      return "Nivel moderado de síntomas asociados al espectro autista en comparación con niños que tienen TEA y que tienen la misma edad cronológica y nivel de lenguaje. Corresponde a las clasificaciones del ADOS-2 de espectro autista o de autismo";
+    }
+    if ([4, 3].includes(val)) {
+      return "Nivel bajo de síntomas asociados al espectro autista en comparación con niños que tienen TEA y que tienen la misma edad cronológica y nivel de lenguaje. Corresponde a las clasificaciones del ADOS-2 de no TEA o de especto autista.";
+    }
+    if ([2, 1].includes(val)) {
+      return "Nivel mínimo o no evidencia de síntomas asociados al espectro autista en comparación con niños que tienen TEA y que tienen la misma edad cronológica y nivel de lenguaje. Corresponde a la clasificación del ADOS-2 de no TEA.";
+    }
+    return "";
+  };
+
+  // Conversión de puntaje igual que en Modulo1.jsx
+  const convertirPuntaje = (puntaje, id_algoritmo, id_codificacion) => {
+    id_algoritmo = parseInt(id_algoritmo, 10);
+    if ((id_algoritmo === 1 || id_algoritmo === 2) && id_codificacion === 135) {
+      if (puntaje === 0) return 0;
+      if (puntaje === 1) return 2;
+      if (puntaje === 2) return 2;
+      if (puntaje === 3) return 2;
+      if ([7, 8, 9].includes(puntaje)) return 0;
+      return puntaje;
+    }
+    if (puntaje === 0) return 0;
+    if (puntaje === 1) return 1;
+    if (puntaje === 2) return 2;
+    if (puntaje === 3) return 2;
+    if ([7, 8, 9].includes(puntaje)) return 0;
+    return puntaje;
+  };
+
+  // Helpers para obtener puntaje por código
+  const getPuntaje = (codigo) => {
+    if (!datos?.puntuaciones) return 0;
+    const p = datos.puntuaciones.find(p => p.codigo === codigo);
+    if (!p) return 0;
+    return convertirPuntaje(Number(p.puntaje), datos.id_algoritmo, p.id_codificacion);
+  };
+
+  // Datos personales
+  const nombres = datos?.nombres || "";
+  const apellidos = datos?.apellidos || "";
+  const fecha = formatFecha(datos?.fecha);
+  const telefono = datos?.telefono || "";
+  const especialista = `${datos?.especialista_nombres || ""} ${datos?.especialista_apellidos || ""}`.trim();
+
+  // AS
+  const narracionSucesos = getPuntaje("A7");
+  const conversacion = getPuntaje("A8");
+  const gestos = getPuntaje("A9");
+  const contactoVisual = getPuntaje("B1");
+  const expresionesFaciales = getPuntaje("B2");
+  const disfruteCompartido = getPuntaje("B4");
+  const caracteristicasIniciaciones = getPuntaje("B7");
+  const calidadRespuestaSocial = getPuntaje("B9");
+  const cantidadComunicacionSocial = getPuntaje("B10");
+  const calidadRelacion = getPuntaje("B11");
 
   // Totales AS
-  const totalAS = 0;
+  const totalAS = [
+    narracionSucesos, conversacion, gestos, contactoVisual, expresionesFaciales,
+    disfruteCompartido, caracteristicasIniciaciones, calidadRespuestaSocial,
+    cantidadComunicacionSocial, calidadRelacion
+  ].reduce((a, b) => a + b, 0);
 
-  // ----------------------------------------
-  // Comportamiento Restringido y Repetitivo
-  // ----------------------------------------
-  const usoEsteriotipado = 0; // (A-4)
-  const interesSensorial = 0; // (D-1)
-  const manierismosManos = 0; // (D-2)
-  const interesExcesivo = 0; // (D-4)
+  // CRR
+  const usoEsteriotipado = getPuntaje("A4");
+  const interesSensorial = getPuntaje("D1");
+  const manierismosManos = getPuntaje("D2");
+  const interesExcesivo = getPuntaje("D4");
 
   // Total CRR
-  const totalCRR = 0;
+  const totalCRR = [
+    usoEsteriotipado, interesSensorial, manierismosManos, interesExcesivo
+  ].reduce((a, b) => a + b, 0);
 
   // Total Global
-  const totalGlobal = 0;
+  const totalGlobal = datos?.total_punto;
 
-  // ----------------------------------------
   // Clasificación y Diagnóstico
-  // ----------------------------------------
-  const clasificacionADOS = "";
-  const diagnosticoGeneral = "";
+  const clasificacionADOS = datos?.clasificacion || "";
+  const diagnosticoGeneral = datos?.diagnostico || "";
 
-  // ----------------------------------------
   // Puntuación Comparativa y Nivel de Síntomas
-  // ----------------------------------------
-  const comparativaADOS = "";
-  const descripcionNivelSintomas = "";
-  const nivelSintomas = "";
+  const comparativaADOS = datos?.puntuacion_comparativa || "";
+  const descripcionNivelSintomas = getDescripcionComparativa(comparativaADOS);
 
-  // Función para generar PDF desde el contenido oculto
+  // PDF
   const generarPDF = () => {
     if (!reportRef.current) return;
     const element = reportRef.current;
@@ -76,7 +127,7 @@ export default function ReporteModulo3() {
 
   return (
     <div className="d-flex flex-column min-vh-100" style={{ background: COLOR_BG }}>
-      <Navbar />
+
       <div className="container my-4">
         <h2 className="text-center mb-4" style={{ color: "#5A6D8C" }}>Módulo 3</h2>
         <div className="text-center mb-4">
@@ -243,7 +294,6 @@ export default function ReporteModulo3() {
         </div>
       </div>
       <div className="mt-auto">
-        <Footer />
       </div>
     </div>
   );

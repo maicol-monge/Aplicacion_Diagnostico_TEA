@@ -108,7 +108,7 @@ const Navbar = () => {
                             color: "#fff",
                             fontWeight: "bold"
                         }}
-                        onClick={() => navigate("/evaluacion-ados")}
+                        onClick={() => navigate("/pacientesados")}
                     >
                         Evaluación ADOS-2
                     </button>
@@ -194,7 +194,7 @@ const Navbar = () => {
                                 }}
                                 onClick={() => {
                                     setShowMenu(false);
-                                    navigate("/evaluacion-ados");
+                                    navigate("/pacientesados");
                                 }}
                             >
                                 Evaluación ADOS-2
