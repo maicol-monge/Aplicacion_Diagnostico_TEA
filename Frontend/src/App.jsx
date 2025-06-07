@@ -117,7 +117,8 @@ function App() {
           <Route path="/modulo-2" element={<Modulo2 />} />
           <Route path="/modulo-3" element={<Modulo3 />} />
           <Route path="/modulo-4" element={<Modulo4 />} />
- {/* <-- Agregado */}
+          <Route path="/reporte-adir" element={<ReportAdiR />} /> {/* <-- Agregado */}
+          <Route path="/reporte-adir-paciente" element={<ReportAdiR_paciente />} /> {/* <-- Agregado */}
         </Route>
         {/* Solo admin (privilegio 3) */}
         <Route element={<ProtectedRoute allowedPrivileges={[3]} />}>
