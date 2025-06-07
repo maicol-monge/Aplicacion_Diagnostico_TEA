@@ -65,7 +65,7 @@ const ResponderItemsAlgoritmo = () => {
         };
         fetchData();
     }, [id_algoritmo, id_ados]);
-    
+
     const handleRespuesta = (id_codificacion, id_puntuacion_codificacion) => {
         setRespuestas({ ...respuestas, [id_codificacion]: id_puntuacion_codificacion });
     };
@@ -192,8 +192,8 @@ const ResponderItemsAlgoritmo = () => {
                 }, { headers: { Authorization: `Bearer ${token}` } });
             }
         }
-        await axios.put(`http://localhost:5000/api/ados/pausar/${id_ados}`, 
-            { estado: 2 }, 
+        await axios.put(`http://localhost:5000/api/ados/pausar/${id_ados}`,
+            { estado: 2 },
             { headers: { Authorization: `Bearer ${token}` } }
         );
         Swal.fire("Algoritmo pausado", "Puedes continuar más tarde.", "info").then(() => {
@@ -358,18 +358,21 @@ const ResponderItemsAlgoritmo = () => {
                                 );
                             })}
                         </div>
-                        <div className="d-flex justify-content-between">
+                        <div
+                            className="d-flex flex-wrap gap-2 justify-content-between justify-content-md-between"
+                            style={{ rowGap: 12 }}
+                        >
                             <button
-                                className="btn"
-                                style={{ background: COLOR_ACCENT, color: "#fff", fontWeight: "bold" }}
+                                className="btn flex-fill"
+                                style={{ background: COLOR_ACCENT, color: "#fff", fontWeight: "bold", minWidth: 120 }}
                                 onClick={() => setIndice(indice - 1)}
                                 disabled={indice === 0}
                             >
                                 Anterior
                             </button>
                             <button
-                                className="btn"
-                                style={{ background: "#6c757d", color: "#fff", fontWeight: "bold" }}
+                                className="btn flex-fill"
+                                style={{ background: "#6c757d", color: "#fff", fontWeight: "bold", minWidth: 120 }}
                                 onClick={() => {
                                     console.log("Navegando a actividades-consulta con id_ados:", id_ados);
                                     navigate(`/ados/actividades-consulta/${id_ados}`)
@@ -378,15 +381,15 @@ const ResponderItemsAlgoritmo = () => {
                                 Consultar actividades
                             </button>
                             <button
-                                className="btn"
-                                style={{ background: "#ffc107", color: "#333", fontWeight: "bold" }}
+                                className="btn flex-fill"
+                                style={{ background: "#ffc107", color: "#333", fontWeight: "bold", minWidth: 120 }}
                                 onClick={handlePausar}
                             >
                                 Pausar algoritmo
                             </button>
                             <button
-                                className="btn"
-                                style={{ background: COLOR_PRIMARY, color: "#fff", fontWeight: "bold" }}
+                                className="btn flex-fill"
+                                style={{ background: COLOR_PRIMARY, color: "#fff", fontWeight: "bold", minWidth: 120 }}
                                 onClick={handleGuardar}
                             >
                                 {indice < codificaciones.length - 1 ? "Siguiente" : "Finalizar"}

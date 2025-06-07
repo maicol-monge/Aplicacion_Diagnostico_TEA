@@ -104,4 +104,56 @@ Gracias por su compromiso profesional.
     });
 }
 
+// Obtener pacientes con tests ADI-R y/o ADOS-2 recientes
+exports.pacientesConTests = (req, res) => {
+    // Solo usuarios activos y pacientes activos
+    const query = `
+        SELECT 
+            p.id_paciente, u.nombres, u.apellidos, u.imagen, p.fecha_nacimiento, p.sexo,
+            (
+                SELECT MAX(fecha) FROM test_adi_r WHERE id_paciente = p.id_paciente AND estado = 1
+            ) AS fecha_ultimo_adir,
+            (
+                SELECT MAX(fecha) FROM test_ados_2 WHERE id_paciente = p.id_paciente AND estado = 0
+            ) AS fecha_ultimo_ados
+        FROM paciente p
+        JOIN usuario u ON p.id_usuario = u.id_usuario
+        WHERE u.estado = 1
+        ORDER BY 
+            GREATEST(
+                IFNULL((SELECT MAX(fecha) FROM test_adi_r WHERE id_paciente = p.id_paciente AND estado = 1), '1970-01-01'),
+                IFNULL((SELECT MAX(fecha) FROM test_ados_2 WHERE id_paciente = p.id_paciente AND estado = 0), '1970-01-01')
+            ) DESC
+    `;
+
+    db.query(query, async (err, pacientes) => {
+        if (err) return res.status(500).json({ message: "Error en el servidor", error: err });
+
+        // Para cada paciente, obtener sus tests ADI-R y ADOS-2
+        const pacientesConTests = await Promise.all(pacientes.map(async (paciente) => {
+            // Tests ADI-R
+            const adirPromise = new Promise((resolve) => {
+                db.query(
+                    "SELECT id_adir, fecha, algoritmo, diagnostico, estado FROM test_adi_r WHERE id_paciente = ? AND estado = 1 ORDER BY fecha DESC",
+                    [paciente.id_paciente],
+                    (err, adir) => resolve(adir || [])
+                );
+            });
+            // Tests ADOS-2
+            const adosPromise = new Promise((resolve) => {
+                db.query(
+                    "SELECT id_ados, fecha, modulo, diagnostico, clasificacion, total_punto, puntuacion_comparativa, estado FROM test_ados_2 WHERE id_paciente = ? AND estado = 0 ORDER BY fecha DESC",
+                    [paciente.id_paciente],
+                    (err, ados) => resolve(ados || [])
+                );
+            });
+
+            const [tests_adir, tests_ados] = await Promise.all([adirPromise, adosPromise]);
+            return { ...paciente, tests_adir, tests_ados };
+        }));
+
+        res.json(pacientesConTests);
+    });
+};
+
 

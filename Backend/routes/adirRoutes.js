@@ -14,7 +14,8 @@ const {
     obtenerIdPacientePorAdir,
     determinarYActualizarTipoSujeto,
     obtenerFechaEntrevistaPorAdir, // <-- nueva función para obtener la fecha de la entrevista
-    guardarDiagnosticoFinal
+    guardarDiagnosticoFinal,
+    obtenerResumenPacienteAdir
 
 } = require("../controllers/adirController");
 const authenticateToken = require("../middlewares/auth"); // Usa el mismo middleware que en pacienteRoutes.js
@@ -37,6 +38,7 @@ router.get("/id-paciente/:id_adir", authenticateToken, obtenerIdPacientePorAdir)
 router.put("/determinar-tipo-sujeto/:id_adir", authenticateToken, determinarYActualizarTipoSujeto);
 router.get("/fecha-entrevista/:id_adir", authenticateToken, obtenerFechaEntrevistaPorAdir); // <-- nueva ruta para obtener la fecha de la entrevista
 router.put("/guardar-diagnostico-final/:id_adir", authenticateToken, guardarDiagnosticoFinal);
+router.get("/resumen-paciente/:id_adir", authenticateToken, obtenerResumenPacienteAdir);
 
 
 module.exports = router;
