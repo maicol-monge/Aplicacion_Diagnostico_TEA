@@ -28,7 +28,8 @@ const {
     obtenerDatosReporteModulo1,
     obtenerDatosReporteModulo3,
     obtenerDatosReporteModulo2,
-    obtenerDatosReporteModulo4
+    obtenerDatosReporteModulo4,
+    validarFiltrosPaciente
 } = require("../controllers/adosController");
 const authenticateToken = require("../middlewares/auth");
 
@@ -63,5 +64,6 @@ router.get("/reporte-modulo-1/:id_ados", authenticateToken, obtenerDatosReporteM
 router.get("/reporte-modulo-3/:id_ados", authenticateToken, obtenerDatosReporteModulo3);
 router.get("/reporte-modulo-2/:id_ados", authenticateToken, obtenerDatosReporteModulo2);
 router.get("/reporte-modulo-4/:id_ados", authenticateToken, obtenerDatosReporteModulo4);
+router.get("/validar-filtros/:id_paciente", authenticateToken, validarFiltrosPaciente);
 
 module.exports = router;

@@ -301,7 +301,7 @@ exports.crearTestAdir = (req, res) => {
     );
 };
 
-// Crear un nuevo test_adi_r SOLO por especialista y si el paciente cumple condiciones
+// Crear un nuevo test_adi_r SOLO si el paciente cumple condiciones
 exports.crearTestAdir = (req, res) => {
     const { id_paciente, id_especialista, algoritmo, tipo_sujeto, edad_mental_confirmada } = req.body;
 
@@ -312,6 +312,7 @@ exports.crearTestAdir = (req, res) => {
         return res.status(400).json({ message: "Debe confirmar que el paciente tiene al menos 2 años de edad mental." });
     }
 
+    // Validar términos y filtro DSM-5
     db.query(
         "SELECT terminos_privacida, filtro_dsm_5 FROM paciente WHERE id_paciente = ?",
         [id_paciente],
@@ -321,7 +322,7 @@ exports.crearTestAdir = (req, res) => {
             }
             const { terminos_privacida, filtro_dsm_5 } = rows[0];
             if (terminos_privacida !== 1 || filtro_dsm_5 !== 1) {
-                return res.status(403).json({ message: "El paciente no cumple los requisitos para la evaluación." });
+                return res.status(403).json({ message: "El paciente debe aceptar los términos de privacidad y cumplir el filtro DSM-5 para realizar la evaluación." });
             }
 
             db.query(
@@ -592,6 +593,114 @@ exports.guardarDiagnosticoFinal = (req, res) => {
         if (err) {
             return res.status(500).json({ message: "Error al guardar el diagnóstico final." });
         }
-        res.json({ message: "Diagnóstico final guardado correctamente." });
+
+        // Buscar datos del paciente para enviar el correo
+        const pacienteQuery = `
+            SELECT u.correo, u.nombres, u.apellidos
+            FROM test_adi_r t
+            JOIN paciente p ON t.id_paciente = p.id_paciente
+            JOIN usuario u ON p.id_usuario = u.id_usuario
+            WHERE t.id_adir = ?
+        `;
+        db.query(pacienteQuery, [id_adir], (err2, results) => {
+            if (!err2 && results.length > 0) {
+                const { correo, nombres, apellidos } = results[0];
+                enviarCorreoDiagnosticoFinalADI(correo, nombres, apellidos);
+            }
+            // No importa si falla el correo, igual respondemos OK
+            res.json({ message: "Diagnóstico final guardado correctamente." });
+        });
+    });
+};
+
+// Nueva función para enviar el correo de notificación de diagnóstico ADI-R final
+function enviarCorreoDiagnosticoFinalADI(destinatario, nombre, apellidos) {
+    const transporter = require("nodemailer").createTransport({
+        service: "gmail",
+        auth: {
+            user: process.env.GMAIL_USER,
+            pass: process.env.GMAIL_PASS
+        }
+    });
+
+    const mensaje = `
+Hola ${nombre} ${apellidos},
+
+Te informamos que el diagnóstico de tu test ADI-R ha sido actualizado por el especialista.
+
+Ya puedes consultar el resultado desde la sección de "Resultados" en el sistema TEA Diagnóstico.
+
+Saludos,
+Equipo TEA Diagnóstico
+`;
+
+    const mailOptions = {
+        from: 'aplicaciondediagnosticodetea@gmail.com',
+        to: destinatario,
+        subject: "Diagnóstico actualizado - Test ADI-R",
+        text: mensaje
+    };
+
+    transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
+            console.log('Error enviando correo de diagnóstico ADI-R:', error);
+        } else {
+            console.log('Correo de diagnóstico ADI-R enviado: ' + info.response);
+        }
+    });
+}
+
+// Obtener resumen paciente ADI-R
+exports.obtenerResumenPacienteAdir = (req, res) => {
+    const { id_adir } = req.params;
+    // 1. Datos personales y diagnóstico
+    const sql = `
+        SELECT 
+            t.id_adir, t.fecha AS fecha_entrevista, t.diagnostico, t.algoritmo, t.tipo_sujeto, t.estado,
+            u.nombres, u.apellidos, 
+            ue.nombres AS especialista_nombre, ue.apellidos AS especialista_apellidos
+        FROM test_adi_r t
+        JOIN paciente p ON t.id_paciente = p.id_paciente
+        JOIN usuario u ON p.id_usuario = u.id_usuario
+        LEFT JOIN especialista e ON t.id_especialista = e.id_especialista
+        LEFT JOIN usuario ue ON e.id_usuario = ue.id_usuario
+        WHERE t.id_adir = ?
+    `;
+    db.query(sql, [id_adir], (err, results) => {
+        if (err || results.length === 0) {
+            return res.status(404).json({ message: "No se encontró el test." });
+        }
+        const datos = results[0];
+
+        // 2. Recupera todas las respuestas de ese test
+        db.query(
+            `SELECT 
+                a.area,
+                q.id_pregunta, 
+                q.pregunta, 
+                r.codigo, 
+                r.observacion
+             FROM respuesta_adi r
+             JOIN pregunta_adi q ON r.id_pregunta = q.id_pregunta
+             JOIN area a ON q.id_area = a.id_area
+             WHERE r.id_adir = ?
+             ORDER BY a.id_area, q.id_pregunta`,
+            [id_adir],
+            (err2, respuestas) => {
+                if (err2) return res.status(500).json({ message: "No se pudieron obtener las respuestas." });
+
+                res.json({
+                    nombres: datos.nombres,
+                    apellidos: datos.apellidos,
+                    fecha: datos.fecha_entrevista,
+                    especialista: datos.especialista_nombre
+                        ? `${datos.especialista_nombre} ${datos.especialista_apellidos}` : "",
+                    diagnostico: datos.diagnostico || "Aquí aparecerá el resumen de tu diagnóstico.",
+                    algoritmo: datos.algoritmo || "No disponible",
+                    tipo_sujeto: datos.tipo_sujeto || "No disponible",
+                    respuestas // <-- todas las respuestas con área, pregunta, calificación y observación
+                });
+            }
+        );
     });
 };

@@ -45,6 +45,8 @@ import Modulo1 from "./Reportes/Modulo1";
 import Modulo2 from "./Reportes/Modulo2";
 import Modulo3 from "./Reportes/Modulo3";
 import Modulo4 from "./Reportes/Modulo4"; 
+import ReportAdiR from "./Reportes/ReportAdiR";
+import ReportAdiR_paciente from "./Reportes/ReportAdiR_paciente";
 
 
 
@@ -103,6 +105,7 @@ function App() {
           <Route path="/algoritmo/:id_adir" element={<Algoritmo />} />
 
           <Route path="/reportes" element={<Reportes />} />
+          <Route path="/reporte-adir" element={<ReportAdiR />} /> 
 
         </Route>
         {/* Solo pacientes (privilegio 1) */}
@@ -117,8 +120,7 @@ function App() {
           <Route path="/modulo-2" element={<Modulo2 />} />
           <Route path="/modulo-3" element={<Modulo3 />} />
           <Route path="/modulo-4" element={<Modulo4 />} />
-          <Route path="/reporte-adir" element={<ReportAdiR />} /> {/* <-- Agregado */}
-          <Route path="/reporte-adir-paciente" element={<ReportAdiR_paciente />} /> {/* <-- Agregado */}
+          <Route path="/reporte-adir-paciente" element={<ReportAdiR_paciente />} /> 
         </Route>
         {/* Solo admin (privilegio 3) */}
         <Route element={<ProtectedRoute allowedPrivileges={[3]} />}>

@@ -8,6 +8,7 @@ import ReporteModulo1 from "../Reportes/Modulo1";
 import ReporteModulo2 from "../Reportes/Modulo2";
 import ReporteModulo3 from "../Reportes/Modulo3";
 import ReporteModulo4 from "../Reportes/Modulo4";
+import ReportAdiR_paciente from "../Reportes/ReportAdiR_paciente";
 
 const COLOR_BG = "#a8dadc";
 const COLOR_PRIMARY = "#457b9d";
@@ -35,6 +36,7 @@ const Resultados = () => {
     const [reporteM2, setReporteM2] = useState(null);
     const [reporteM3, setReporteM3] = useState(null);
     const [reporteM4, setReporteM4] = useState(null);
+    const [reporteAdiR, setReporteAdiR] = useState(null);
     const navigate = useNavigate();
 
     const fetchResultados = async (id_paciente, token, tipo, fechaInicio, fechaFin) => {
@@ -130,6 +132,17 @@ const Resultados = () => {
                     { headers: { Authorization: `Bearer ${token}` } }
                 );
                 setReporteM4(res.data);
+            } catch (e) {
+                alert("No se pudo generar el reporte.");
+            }
+        } else if (test.tipo === "ADI-R") {
+            try {
+                const token = localStorage.getItem("token");
+                const res = await axios.get(
+                    `http://localhost:5000/api/adir/resumen-paciente/${test.id}`,
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+                setReporteAdiR(res.data);
             } catch (e) {
                 alert("No se pudo generar el reporte.");
             }
@@ -301,6 +314,21 @@ const Resultados = () => {
                                 </div>
                                 <div className="modal-body">
                                     <ReporteModulo4 datos={reporteM4} />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+                {reporteAdiR && (
+                    <div className="modal fade show d-block" tabIndex="-1" style={{ background: "rgba(0,0,0,0.5)" }}>
+                        <div className="modal-dialog modal-xl modal-dialog-centered">
+                            <div className="modal-content">
+                                <div className="modal-header">
+                                    <h5 className="modal-title">Reporte ADI-R</h5>
+                                    <button type="button" className="btn-close" onClick={() => setReporteAdiR(null)}></button>
+                                </div>
+                                <div className="modal-body">
+                                    <ReportAdiR_paciente datos={reporteAdiR} />
                                 </div>
                             </div>
                         </div>

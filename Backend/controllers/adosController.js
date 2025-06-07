@@ -68,6 +68,26 @@ exports.crearTestAdos = (req, res) => {
     });
 };
 
+// ...al final del archivo, antes de module.exports o donde agrupas los exports...
+
+exports.validarFiltrosPaciente = (req, res) => {
+    const { id_paciente } = req.params;
+    db.query(
+        "SELECT terminos_privacida, filtro_dsm_5 FROM paciente WHERE id_paciente = ?",
+        [id_paciente],
+        (err, rows) => {
+            if (err || rows.length === 0) {
+                return res.status(404).json({ message: "Paciente no encontrado." });
+            }
+            const { terminos_privacida, filtro_dsm_5 } = rows[0];
+            if (terminos_privacida !== 1 || filtro_dsm_5 !== 1) {
+                return res.status(200).json({ permitido: false, message: "El paciente no ha aceptado los términos de privacidad o no cumple el filtro DSM-5." });
+            }
+            return res.status(200).json({ permitido: true });
+        }
+    );
+};
+
 exports.guardarActividadRealizada = (req, res) => {
     const { id_ados, id_actividad, observacion } = req.body;
     const query = `
