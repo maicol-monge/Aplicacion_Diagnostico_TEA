@@ -40,6 +40,10 @@ import Algoritmo from "./Evaluacion/Algoritmo";
 import Reportes from "./Especialista/Reportes";
 
 
+import ModuloT from "./Paciente/ModuloT";
+
+import Modulo1 from "./Paciente/Modulo1";
+
 
 function App() {
   useEffect(() => {
@@ -105,6 +109,8 @@ function App() {
           <Route path="/desactivar-cuenta" element={<DesactivarCuenta />} />
           <Route path="/perfil-paciente" element={<PerfilPaciente />} />
           <Route path="/resultados" element={<Resultados />} />
+          <Route path="/modulo-t" element={<ModuloT />} />
+          <Route path="/modulo-1" element={<Modulo1 />} />
         </Route>
         {/* Solo admin (privilegio 3) */}
         <Route element={<ProtectedRoute allowedPrivileges={[3]} />}>
