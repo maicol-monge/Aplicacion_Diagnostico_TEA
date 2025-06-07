@@ -41,8 +41,11 @@ import Reportes from "./Especialista/Reportes";
 
 
 import ModuloT from "./Paciente/ModuloT";
-
 import Modulo1 from "./Paciente/Modulo1";
+import Modulo2 from "./Paciente/Modulo2";
+import Modulo3 from "./Paciente/Modulo3";
+import Modulo4 from "./Paciente/Modulo4"; // <-- Agregado
+
 
 
 function App() {
@@ -111,6 +114,10 @@ function App() {
           <Route path="/resultados" element={<Resultados />} />
           <Route path="/modulo-t" element={<ModuloT />} />
           <Route path="/modulo-1" element={<Modulo1 />} />
+          <Route path="/modulo-2" element={<Modulo2 />} />
+          <Route path="/modulo-3" element={<Modulo3 />} />
+          <Route path="/modulo-4" element={<Modulo4 />} />
+ {/* <-- Agregado */}
         </Route>
         {/* Solo admin (privilegio 3) */}
         <Route element={<ProtectedRoute allowedPrivileges={[3]} />}>
