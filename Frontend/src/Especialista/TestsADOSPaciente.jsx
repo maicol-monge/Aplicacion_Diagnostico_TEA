@@ -32,6 +32,16 @@ const TestsADOSPaciente = () => {
     }, [id_paciente]);
 
     const handleCrearTest = async () => {
+        // Validar filtros antes de mostrar el modal
+        const token = localStorage.getItem("token");
+        const res = await axios.get(`http://localhost:5000/api/ados/validar-filtros/${id_paciente}`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!res.data.permitido) {
+            Swal.fire("No permitido", res.data.message, "warning");
+            return;
+        }
+
         const { value: modulo } = await Swal.fire({
             title: 'Selecciona el módulo',
             input: 'select',

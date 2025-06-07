@@ -234,7 +234,7 @@ const ActividadesADOS = () => {
                             headers: { Authorization: `Bearer ${token}` }
                         });
                         nombreAlgoritmo = algRes.data.titulo || nombreAlgoritmo;
-                    } catch (e) {}
+                    } catch (e) { }
 
                     await Swal.fire({
                         icon: "info",
@@ -271,7 +271,7 @@ const ActividadesADOS = () => {
                         headers: { Authorization: `Bearer ${token}` }
                     });
                     nombreAlgoritmo = algRes.data.titulo || nombreAlgoritmo;
-                } catch (e) {}
+                } catch (e) { }
                 await Swal.fire({
                     icon: "info",
                     title: "Algoritmo seleccionado",
@@ -300,7 +300,7 @@ const ActividadesADOS = () => {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 nombreAlgoritmo = algRes.data.titulo || nombreAlgoritmo;
-            } catch (e) {}
+            } catch (e) { }
             await Swal.fire({
                 icon: "info",
                 title: "Algoritmo seleccionado",
@@ -326,7 +326,7 @@ const ActividadesADOS = () => {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 nombreAlgoritmo = algRes.data.titulo || nombreAlgoritmo;
-            } catch (e) {}
+            } catch (e) { }
             await Swal.fire({
                 icon: "info",
                 title: "Algoritmo seleccionado",
@@ -361,27 +361,27 @@ const ActividadesADOS = () => {
             const opciones = puntRes.data;
 
             let html = `
-                <div style="text-align:left">
-                    <div style="background:${COLOR_ACCENT};color:#fff;padding:10px 16px;border-radius:10px 10px 0 0;font-weight:bold;font-size:1.1em;">
-                        Para continuar, debes contestar esta pregunta. Esto determinará el algoritmo a aplicar.
-                    </div>
-                    <div style="padding:18px 10px 0 10px;">
-                        <b style="color:${COLOR_PRIMARY};font-size:1.1em;">${pregunta}</b><br/>
-                        ${descripcion ? `<div style="font-size:0.97em;margin-bottom:8px;color:${COLOR_DARK};">${descripcion}</div>` : ""}
-            `;
+        <div style="text-align:left">
+            <div style="background:${COLOR_ACCENT};color:#fff;padding:10px 16px;border-radius:10px 10px 0 0;font-weight:bold;font-size:1.1em;">
+                Para continuar, debes contestar esta pregunta. Esto determinará el algoritmo a aplicar.
+            </div>
+            <div style="padding:18px 10px 0 10px;">
+                <b style="color:${COLOR_PRIMARY};font-size:1.1em;">${pregunta}</b><br/>
+                ${descripcion ? `<div style="font-size:0.97em;margin-bottom:8px;color:${COLOR_DARK};">${descripcion}</div>` : ""}
+    `;
             opciones.forEach(op => {
                 let desc = op.descripcion;
                 if (desc && typeof desc === "object" && desc.data) {
                     desc = new TextDecoder().decode(new Uint8Array(desc.data));
                 }
                 html += `
-                    <div style="margin-bottom:8px;">
-                        <input type="radio" id="op${op.id_puntuacion_codificacion}" name="nivel" value="${op.id_puntuacion_codificacion}" style="accent-color:${COLOR_PRIMARY};margin-right:6px;">
-                        <label for="op${op.id_puntuacion_codificacion}" style="cursor:pointer;">
-                            <span style="color:${COLOR_ACCENT};font-weight:bold;">${op.puntaje}</span> = ${desc}
-                        </label>
-                    </div>
-                `;
+            <div style="margin-bottom:8px;">
+                <input type="radio" id="op${op.id_puntuacion_codificacion}" name="nivel" value="${op.id_puntuacion_codificacion}" style="accent-color:${COLOR_PRIMARY};margin-right:6px;">
+                <label for="op${op.id_puntuacion_codificacion}" style="cursor:pointer;">
+                    <span style="color:${COLOR_ACCENT};font-weight:bold;">${op.puntaje}</span> = ${desc}
+                </label>
+            </div>
+        `;
             });
             html += "</div></div>";
 
@@ -419,11 +419,20 @@ const ActividadesADOS = () => {
                 const opcionSeleccionada = opciones.find(op => op.id_puntuacion_codificacion === id_puntuacion_codificacion);
                 const puntaje = opcionSeleccionada ? opcionSeleccionada.puntaje : null;
 
-                // 2. Luego, valida la edad como ya lo hacías
+                // 2. Valida la edad y el puntaje según la lógica solicitada
                 const edadMeses = calcularEdadMeses(fechaNacimiento);
                 let id_algoritmo = null;
-                if (edadMeses >= 12 && edadMeses <= 20) id_algoritmo = 7;
-                else if (edadMeses >= 21 && edadMeses <= 30) id_algoritmo = 8;
+
+                if (
+                    (edadMeses >= 12 && edadMeses <= 20) ||
+                    (edadMeses >= 21 && edadMeses <= 30 && (puntaje === 3 || puntaje === 4))
+                ) {
+                    id_algoritmo = 7;
+                } else if (
+                    (edadMeses >= 21 && edadMeses <= 30 && (puntaje === 0 || puntaje === 1 || puntaje === 2))
+                ) {
+                    id_algoritmo = 8;
+                }
 
                 if (id_algoritmo) {
                     let nombreAlgoritmo = "Algoritmo";
@@ -432,22 +441,22 @@ const ActividadesADOS = () => {
                             headers: { Authorization: `Bearer ${token}` }
                         });
                         nombreAlgoritmo = algRes.data.titulo || nombreAlgoritmo;
-                    } catch (e) {}
+                    } catch (e) { }
                     await Swal.fire({
                         icon: "info",
                         title: "Algoritmo seleccionado",
                         html: `
-                            <div style="font-size:1.1em;">
-                                Se aplicará el <b style="color:${COLOR_PRIMARY};">${nombreAlgoritmo}</b> según la edad del paciente.<br/><br/>
-                                Haz clic en <b>Continuar</b> para responder las preguntas del algoritmo.
-                            </div>
-                        `,
+                    <div style="font-size:1.1em;">
+                        Se aplicará el <b style="color:${COLOR_PRIMARY};">${nombreAlgoritmo}</b> según la edad y respuesta seleccionada.<br/><br/>
+                        Haz clic en <b>Continuar</b> para responder las preguntas del algoritmo.
+                    </div>
+                `,
                         confirmButtonText: "Continuar",
                         customClass: { popup: 'swal2-border-radius' }
                     });
                     navigate(`/ados/responder-items/${id_ados_final}/${id_algoritmo}`);
                 } else {
-                    Swal.fire("No se puede elegir algoritmo", "La edad no cumple los requisitos para este módulo.", "warning");
+                    Swal.fire("No se puede elegir algoritmo", "La edad y/o respuesta no cumplen los requisitos para este módulo.", "warning");
                 }
             }
             return;
