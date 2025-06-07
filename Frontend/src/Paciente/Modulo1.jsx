@@ -80,7 +80,7 @@ export default function ReporteModulo1() {
     <div className="d-flex flex-column min-vh-100" style={{ background: COLOR_BG }}>
       <Navbar />
       <div className="container my-4">
-        <h2 className="text-center text-primary mb-4">Módulo T</h2>
+        <h2 className="text-center text-primary mb-4">Módulo 1</h2>
         <div className="text-center mb-4">
           <button className="btn btn-primary" onClick={generarPDF}>
             Generar Reporte PDF
@@ -91,7 +91,7 @@ export default function ReporteModulo1() {
             {/* Encabezado */}
             <div className="row mb-4">
               <div className="col-md-6"><h1 className="text-primary">ADOS-2</h1></div>
-              <div className="col-md-6 text-end"><h1 className="text-primary">Algoritmo Módulo T</h1></div>
+              <div className="col-md-6 text-end"><h1 className="text-primary">Algoritmo Módulo 1</h1></div>
             </div>
 
             {/* Datos Personales */}
@@ -119,6 +119,36 @@ export default function ReporteModulo1() {
                   <div className="border rounded p-1">{especialista}</div>
                 </div>
               </div>
+            </fieldset>
+
+            {/* ================= */}
+            {/* BLOQUE ALGORITMO */}
+            {/* ================= */}
+            <fieldset class="border p-3">
+                <div class="row g-2 mb-2">
+                    <div class="col-md-8">
+      
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                        <div class="card-header fw-bold text-center">
+                            ALGORITMO
+                        </div>
+                    <div class="card-body">
+                    <div class="row">
+            <div class="col-6 text-center border-end">
+              <div class="fw-bold"><small>Niños pequeños/mayores con pocas o ninguna palabra </small></div>
+              
+            </div>
+            <div class="col-6 text-center">
+              <div class="fw-bold"><small>Niños mayores con algunas palabras</small></div>
+              
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
             </fieldset>
 
             {/* Afectación Social */}
