@@ -3,66 +3,90 @@ import html2pdf from "html2pdf.js";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar_paciente";
 
-export default function ReporteModulo4() {
+export default function ReporteModulo4({ datos }) {
   const reportRef = useRef();
   const COLOR_BG = "#f8f9fa";
 
-  // -------------------------
+  // Formato de fecha
+  const formatFecha = (fechaStr) => {
+    if (!fechaStr) return "";
+    const d = new Date(fechaStr);
+    if (isNaN(d)) return "";
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+
+  // Conversión de puntaje igual que en Modulo1.jsx
+  const convertirPuntaje = (puntaje, id_algoritmo, id_codificacion) => {
+    id_algoritmo = parseInt(id_algoritmo, 10);
+    if (id_algoritmo === 6 && id_codificacion === 135) {
+      if (puntaje === 0) return 0;
+      if (puntaje === 1) return 2;
+      if (puntaje === 2) return 2;
+      if (puntaje === 3) return 2;
+      if ([7, 8, 9].includes(puntaje)) return 0;
+      return puntaje;
+    }
+    if (puntaje === 0) return 0;
+    if (puntaje === 1) return 1;
+    if (puntaje === 2) return 2;
+    if (puntaje === 3) return 2;
+    if ([7, 8, 9].includes(puntaje)) return 0;
+    return puntaje;
+  };
+
+  // Helper para obtener puntaje por código
+  const getPuntaje = (codigo) => {
+    if (!datos?.puntuaciones) return 0;
+    const p = datos.puntuaciones.find(p => p.codigo === codigo);
+    if (!p) return 0;
+    return convertirPuntaje(Number(p.puntaje), datos.id_algoritmo, p.id_codificacion);
+  };
+
   // Datos personales
-  // -------------------------
-  const nombres = "José Mario";
-  const apellidos = "Morales Quezada";
-  const fecha = "6 de junio de 2025";
-  const telefono = "7907-6010";
-  const especialista = "Lic. Juan Acevedo";
+  const nombres = datos?.nombres || "";
+  const apellidos = datos?.apellidos || "";
+  const fecha = formatFecha(datos?.fecha);
+  const telefono = datos?.telefono || "";
+  const especialista = `${datos?.especialista_nombres || ""} ${datos?.especialista_apellidos || ""}`.trim();
 
-  // -------------------------
   // Comunicación
-  // -------------------------
-  const usoEsteriotipado = 0; // (A-4)
-  const conversacion = 0; // (A-8)
-  const gestos = 0; // (A-9)
-  const gestosEnfaticos = 0; // (A-10)
-  const totalComunicacion = 0;
+  const usoEsteriotipado = getPuntaje("A4");
+  const conversacion = getPuntaje("A8");
+  const gestos = getPuntaje("A9");
+  const gestosEnfaticos = getPuntaje("A10");
+  const totalComunicacion = usoEsteriotipado + conversacion + gestos + gestosEnfaticos;
 
-  // -------------------------
   // Interacción social recíproca
-  // -------------------------
-  const contactoVisual = 0; // (B-1)
-  const expresionesFaciales = 0; // (B-2)
-  const comentariosEmociones = 0; // (B-6)
-  const responsabilidad = 0; // (B-8)
-  const caracteristicasIniciaciones = 0; // (B-9)
-  const calidadRespuestaSocial = 0; // (B-11)
-  const cantidadComunicacionSocial = 0; // (B-12)
-  const totalISR = 0;
+  const contactoVisual = getPuntaje("B1");
+  const expresionesFaciales = getPuntaje("B2");
+  const comentariosEmociones = getPuntaje("B6");
+  const responsabilidad = getPuntaje("B8");
+  const caracteristicasIniciaciones = getPuntaje("B9");
+  const calidadRespuestaSocial = getPuntaje("B11");
+  const cantidadComunicacionSocial = getPuntaje("B12");
+  const totalISR = contactoVisual + expresionesFaciales + comentariosEmociones + responsabilidad + caracteristicasIniciaciones + calidadRespuestaSocial + cantidadComunicacionSocial;
 
-  // -------------------------
   // Puntuación total C+ISR
-  // -------------------------
-  const totalC_ISR = 0;
+  const totalC_ISR = totalComunicacion + totalISR;
 
-  // -------------------------
   // Imaginación y creatividad (C-1)
-  // -------------------------
-  const imaginacionCreatividad = 0; // (C-1)
+  const imaginacionCreatividad = getPuntaje("C1");
 
-  // -------------------------
   // Comportamientos estereotipados e intereses restringidos
-  // -------------------------
-  const interesSensorial = 0; // (D-1)
-  const manierismosManos = 0; // (D-2)
-  const interesExcesivo = 0; // (D-4)
-  const compulsiones = 0; // (D-5)
-  const totalComportamientos = 0;
+  const interesSensorial = getPuntaje("D1");
+  const manierismosManos = getPuntaje("D2");
+  const interesExcesivo = getPuntaje("D4");
+  const compulsiones = getPuntaje("D5");
+  const totalComportamientos = interesSensorial + manierismosManos + interesExcesivo + compulsiones;
 
-  // -------------------------
   // Clasificación y Diagnóstico
-  // -------------------------
-  const clasificacionADOS = "";
-  const diagnosticoGeneral = "";
+  const clasificacionADOS = datos?.clasificacion || "";
+  const diagnosticoGeneral = datos?.diagnostico || "";
 
-  // Función para generar PDF desde el contenido oculto
+  // PDF
   const generarPDF = () => {
     if (!reportRef.current) return;
     const element = reportRef.current;
@@ -78,7 +102,7 @@ export default function ReporteModulo4() {
 
   return (
     <div className="d-flex flex-column min-vh-100" style={{ background: COLOR_BG }}>
-      <Navbar />
+
       <div className="container my-4">
         <h2 className="text-center mb-4" style={{ color: "#FF8C69" }}>Módulo 4</h2>
         <div className="text-center mb-4">
@@ -241,7 +265,6 @@ export default function ReporteModulo4() {
               </div>
             </fieldset>
 
-
             {/* Clasificación y Diagnóstico */}
             <fieldset className="border rounded p-3 mb-4">
               <legend className="w-auto px-2">CLASIFICACIÓN Y DIAGNÓSTICO</legend>
@@ -258,7 +281,6 @@ export default function ReporteModulo4() {
         </div>
       </div>
       <div className="mt-auto">
-        <Footer />
       </div>
     </div>
   );

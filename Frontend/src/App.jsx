@@ -40,11 +40,11 @@ import Algoritmo from "./Evaluacion/Algoritmo";
 import Reportes from "./Especialista/Reportes";
 
 
-import ModuloT from "./Paciente/ModuloT";
-import Modulo1 from "./Paciente/Modulo1";
-import Modulo2 from "./Paciente/Modulo2";
-import Modulo3 from "./Paciente/Modulo3";
-import Modulo4 from "./Paciente/Modulo4"; // <-- Agregado
+import ModuloT from "./Reportes/ModuloT";
+import Modulo1 from "./Reportes/Modulo1";
+import Modulo2 from "./Reportes/Modulo2";
+import Modulo3 from "./Reportes/Modulo3";
+import Modulo4 from "./Reportes/Modulo4"; 
 
 
 

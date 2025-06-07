@@ -3,11 +3,25 @@ import axios from "axios";
 import Navbar from "../components/Navbar_paciente";
 import Footer from "../components/Footer";
 import { useNavigate } from "react-router-dom";
+import ReporteModuleT from "../Reportes/ModuloT";
+import ReporteModulo1 from "../Reportes/Modulo1";
+import ReporteModulo2 from "../Reportes/Modulo2";
+import ReporteModulo3 from "../Reportes/Modulo3";
+import ReporteModulo4 from "../Reportes/Modulo4";
 
 const COLOR_BG = "#a8dadc";
 const COLOR_PRIMARY = "#457b9d";
 const COLOR_DARK = "#1d3557";
 const COLOR_ACCENT = "#f3859e";
+
+// Helper para fecha local en formato YYYY-MM-DD
+const getFechaLocal = () => {
+    const hoy = new Date();
+    const year = hoy.getFullYear();
+    const month = String(hoy.getMonth() + 1).padStart(2, "0");
+    const day = String(hoy.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+};
 
 const Resultados = () => {
     const [tests, setTests] = useState([]);
@@ -16,6 +30,11 @@ const Resultados = () => {
     const [tipo, setTipo] = useState("todos");
     const [fechaInicio, setFechaInicio] = useState("");
     const [fechaFin, setFechaFin] = useState("");
+    const [reporteT, setReporteT] = useState(null);
+    const [reporteM1, setReporteM1] = useState(null);
+    const [reporteM2, setReporteM2] = useState(null);
+    const [reporteM3, setReporteM3] = useState(null);
+    const [reporteM4, setReporteM4] = useState(null);
     const navigate = useNavigate();
 
     const fetchResultados = async (id_paciente, token, tipo, fechaInicio, fechaFin) => {
@@ -58,6 +77,67 @@ const Resultados = () => {
         // eslint-disable-next-line
     }, [tipo, fechaInicio, fechaFin, navigate]);
 
+    const handleGenerarResultado = async (test) => {
+        if (test.tipo === "ADOS-2" && test.modulo === "T") {
+            try {
+                const token = localStorage.getItem("token");
+                const res = await axios.get(
+                    `http://localhost:5000/api/ados/reporte-modulo-t/${test.id}`,
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+                setReporteT(res.data);
+            } catch (e) {
+                alert("No se pudo generar el reporte.");
+            }
+        } else if (test.tipo === "ADOS-2" && test.modulo === "1") {
+            try {
+                const token = localStorage.getItem("token");
+                const res = await axios.get(
+                    `http://localhost:5000/api/ados/reporte-modulo-1/${test.id}`,
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+                setReporteM1(res.data);
+            } catch (e) {
+                alert("No se pudo generar el reporte.");
+            }
+        } else if (test.tipo === "ADOS-2" && test.modulo === "2") {
+            try {
+                const token = localStorage.getItem("token");
+                const res = await axios.get(
+                    `http://localhost:5000/api/ados/reporte-modulo-2/${test.id}`,
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+                setReporteM2(res.data);
+            } catch (e) {
+                alert("No se pudo generar el reporte.");
+            }
+        } else if (test.tipo === "ADOS-2" && test.modulo === "3") {
+            try {
+                const token = localStorage.getItem("token");
+                const res = await axios.get(
+                    `http://localhost:5000/api/ados/reporte-modulo-3/${test.id}`,
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+                setReporteM3(res.data);
+            } catch (e) {
+                alert("No se pudo generar el reporte.");
+            }
+        } else if (test.tipo === "ADOS-2" && test.modulo === "4") {
+            try {
+                const token = localStorage.getItem("token");
+                const res = await axios.get(
+                    `http://localhost:5000/api/ados/reporte-modulo-4/${test.id}`,
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+                setReporteM4(res.data);
+            } catch (e) {
+                alert("No se pudo generar el reporte.");
+            }
+        } else {
+            alert(`Generar resultado para ${test.tipo} (ID: ${test.id})`);
+        }
+    };
+
     return (
         <div className="d-flex flex-column min-vh-100" style={{ background: COLOR_BG }}>
             <Navbar />
@@ -78,8 +158,15 @@ const Resultados = () => {
                             type="date"
                             className="form-control"
                             value={fechaInicio}
-                            onChange={e => setFechaInicio(e.target.value)}
+                            onChange={e => {
+                                const hoy = getFechaLocal();
+                                if (e.target.value > hoy) return; // Evita fechas futuras
+                                setFechaInicio(e.target.value);
+                                // Si la fecha de fin es menor, la resetea
+                                if (fechaFin && e.target.value > fechaFin) setFechaFin("");
+                            }}
                             placeholder="Fecha inicio"
+                            max={getFechaLocal()} // No permite fechas futuras
                         />
                     </div>
                     <div className="col-md-3 mb-2">
@@ -87,8 +174,13 @@ const Resultados = () => {
                             type="date"
                             className="form-control"
                             value={fechaFin}
-                            onChange={e => setFechaFin(e.target.value)}
+                            onChange={e => {
+                                if (fechaInicio && e.target.value < fechaInicio) return; // Evita fechas anteriores a inicio
+                                setFechaFin(e.target.value);
+                            }}
                             placeholder="Fecha fin"
+                            min={fechaInicio || undefined} // No permite fechas antes de inicio
+                            max={getFechaLocal()} // No permite fechas futuras
                         />
                     </div>
                 </div>
@@ -112,16 +204,17 @@ const Resultados = () => {
                                         <p className="mb-2" style={{ color: COLOR_DARK }}>
                                             <strong>Fecha:</strong> {new Date(test.fecha).toLocaleDateString()}
                                         </p>
-                                        <p className="mb-2" style={{ color: COLOR_DARK }}>
-                                            <strong>Diagnóstico:</strong> {test.diagnostico}
-                                        </p>
                                         {test.tipo === "ADOS-2" && (
                                             <p className="mb-2" style={{ color: COLOR_DARK }}>
                                                 <strong>Módulo:</strong> {test.modulo} <br />
-                                                <strong>Clasificación:</strong> {test.clasificacion}
                                             </p>
                                         )}
-                                        {/* Aquí puedes agregar botones de descarga si lo deseas */}
+                                        <button
+                                            className="btn btn-success mt-2"
+                                            onClick={() => handleGenerarResultado(test)}
+                                        >
+                                            Generar Resultado
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -137,6 +230,82 @@ const Resultados = () => {
                         Volver
                     </button>
                 </div>
+                {reporteT && (
+                    <div className="modal fade show d-block" tabIndex="-1" style={{ background: "rgba(0,0,0,0.5)" }}>
+                        <div className="modal-dialog modal-xl modal-dialog-centered">
+                            <div className="modal-content">
+                                <div className="modal-header">
+                                    <h5 className="modal-title">Reporte Módulo T</h5>
+                                    <button type="button" className="btn-close" onClick={() => setReporteT(null)}></button>
+                                </div>
+                                <div className="modal-body">
+                                    {console.log(reporteT)}
+                                    <ReporteModuleT datos={reporteT} />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+                {reporteM1 && (
+                    <div className="modal fade show d-block" tabIndex="-1" style={{ background: "rgba(0,0,0,0.5)" }}>
+                        <div className="modal-dialog modal-xl modal-dialog-centered">
+                            <div className="modal-content">
+                                <div className="modal-header">
+                                    <h5 className="modal-title">Reporte Módulo 1</h5>
+                                    <button type="button" className="btn-close" onClick={() => setReporteM1(null)}></button>
+                                </div>
+                                <div className="modal-body">
+                                    <ReporteModulo1 datos={reporteM1} />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+                {reporteM2 && (
+                    <div className="modal fade show d-block" tabIndex="-1" style={{ background: "rgba(0,0,0,0.5)" }}>
+                        <div className="modal-dialog modal-xl modal-dialog-centered">
+                            <div className="modal-content">
+                                <div className="modal-header">
+                                    <h5 className="modal-title">Reporte Módulo 2</h5>
+                                    <button type="button" className="btn-close" onClick={() => setReporteM2(null)}></button>
+                                </div>
+                                <div className="modal-body">
+                                    <ReporteModulo2 datos={reporteM2} />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+                {reporteM3 && (
+                    <div className="modal fade show d-block" tabIndex="-1" style={{ background: "rgba(0,0,0,0.5)" }}>
+                        <div className="modal-dialog modal-xl modal-dialog-centered">
+                            <div className="modal-content">
+                                <div className="modal-header">
+                                    <h5 className="modal-title">Reporte Módulo 3</h5>
+                                    <button type="button" className="btn-close" onClick={() => setReporteM3(null)}></button>
+                                </div>
+                                <div className="modal-body">
+                                    <ReporteModulo3 datos={reporteM3} />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+                {reporteM4 && (
+                    <div className="modal fade show d-block" tabIndex="-1" style={{ background: "rgba(0,0,0,0.5)" }}>
+                        <div className="modal-dialog modal-xl modal-dialog-centered">
+                            <div className="modal-content">
+                                <div className="modal-header">
+                                    <h5 className="modal-title">Reporte Módulo 4</h5>
+                                    <button type="button" className="btn-close" onClick={() => setReporteM4(null)}></button>
+                                </div>
+                                <div className="modal-body">
+                                    <ReporteModulo4 datos={reporteM4} />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
             <Footer />
         </div>

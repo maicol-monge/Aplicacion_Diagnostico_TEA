@@ -23,7 +23,12 @@ const {
     actualizarPuntuacionComparativa,
     actualizarDiagnostico,
     obtenerActividadesPorTest,
-    obtenerGrupoPorCodificacion
+    obtenerGrupoPorCodificacion,
+    obtenerDatosReporteModuloT,
+    obtenerDatosReporteModulo1,
+    obtenerDatosReporteModulo3,
+    obtenerDatosReporteModulo2,
+    obtenerDatosReporteModulo4
 } = require("../controllers/adosController");
 const authenticateToken = require("../middlewares/auth");
 
@@ -53,5 +58,10 @@ router.put("/puntuacion-comparativa/:id_ados", authenticateToken, actualizarPunt
 router.put("/diagnostico/:id_ados", authenticateToken, actualizarDiagnostico);
 router.get("/actividades-por-test/:id_ados", authenticateToken, obtenerActividadesPorTest);
 router.get("/grupo-codificacion/:id_codificacion", authenticateToken, obtenerGrupoPorCodificacion);
+router.get("/reporte-modulo-t/:id_ados", authenticateToken, obtenerDatosReporteModuloT);
+router.get("/reporte-modulo-1/:id_ados", authenticateToken, obtenerDatosReporteModulo1);
+router.get("/reporte-modulo-3/:id_ados", authenticateToken, obtenerDatosReporteModulo3);
+router.get("/reporte-modulo-2/:id_ados", authenticateToken, obtenerDatosReporteModulo2);
+router.get("/reporte-modulo-4/:id_ados", authenticateToken, obtenerDatosReporteModulo4);
 
 module.exports = router;

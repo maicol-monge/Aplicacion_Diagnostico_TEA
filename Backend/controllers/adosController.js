@@ -1,4 +1,5 @@
 const db = require("../config/db");
+const nodemailer = require("nodemailer");
 
 // Listar todos los pacientes con opción de ver sus tests ADOS-2
 exports.listarPacientesConAdos = (req, res) => {
@@ -394,18 +395,79 @@ exports.actualizarPuntuacionComparativa = (req, res) => {
 };
 
 // Actualizar diagnóstico
+// ...existing code...
+
+// Actualizar diagnóstico y notificar al paciente por correo
 exports.actualizarDiagnostico = (req, res) => {
     const { id_ados } = req.params;
     const { diagnostico } = req.body;
+
+    // Primero, actualiza el diagnóstico
     db.query(
         "UPDATE test_ados_2 SET diagnostico = ? WHERE id_ados = ?",
         [diagnostico, id_ados],
-        (err) => {
+        (err, result) => {
             if (err) return res.status(500).json({ message: "Error al actualizar diagnóstico" });
-            res.json({ message: "Diagnóstico actualizado" });
+
+            // Luego, busca el paciente y su correo
+            const query = `
+                SELECT u.correo, u.nombres, u.apellidos
+                FROM test_ados_2 t
+                JOIN paciente p ON t.id_paciente = p.id_paciente
+                JOIN usuario u ON p.id_usuario = u.id_usuario
+                WHERE t.id_ados = ?
+            `;
+            db.query(query, [id_ados], (err2, results) => {
+                if (err2 || results.length === 0) {
+                    // Si no se puede enviar el correo, igual responde OK
+                    return res.json({ message: "Diagnóstico actualizado, pero no se pudo notificar al paciente" });
+                }
+                const { correo, nombres, apellidos } = results[0];
+                enviarCorreoDiagnosticoADOS(correo, nombres, apellidos);
+                res.json({ message: "Diagnóstico actualizado y paciente notificado" });
+            });
         }
     );
 };
+
+// Función para enviar el correo de notificación de diagnóstico ADOS-2
+function enviarCorreoDiagnosticoADOS(destinatario, nombre, apellidos) {
+    const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+            user: process.env.GMAIL_USER,
+            pass: process.env.GMAIL_PASS
+        }
+    });
+
+    const mensaje = `
+Hola ${nombre} ${apellidos},
+
+Te informamos que el diagnóstico de tu test ADOS-2 ha sido actualizado por el especialista.
+
+Ya puedes consultar el resultado desde la sección de "Resultados" en el sistema TEA Diagnóstico.
+
+Saludos,
+Equipo TEA Diagnóstico
+`;
+
+    const mailOptions = {
+        from: 'aplicaciondediagnosticodetea@gmail.com',
+        to: destinatario,
+        subject: "Diagnóstico actualizado - Test ADOS-2",
+        text: mensaje
+    };
+
+    transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
+            console.log('Error enviando correo de diagnóstico ADOS-2:', error);
+        } else {
+            console.log('Correo de diagnóstico ADOS-2 enviado: ' + info.response);
+        }
+    });
+}
+
+// ...existing code...
 
 exports.obtenerActividadesPorTest = (req, res) => {
     const { id_ados } = req.params;
@@ -449,5 +511,374 @@ exports.obtenerGrupoPorCodificacion = (req, res) => {
             return res.status(404).json({ message: "No se encontró grupo para ese id_codificacion" });
         }
         res.json({ grupo: results[0].grupo });
+    });
+};
+
+// Obtener datos completos para el reporte del Módulo T
+exports.obtenerDatosReporteModuloT = (req, res) => {
+    const { id_ados } = req.params;
+
+    // 1. Datos del test, paciente y especialista, y fecha_nacimiento para calcular edad
+    const sql = `
+        SELECT 
+            t.id_ados, t.fecha, t.modulo, t.diagnostico, t.clasificacion, t.total_punto, t.puntuacion_comparativa,
+            u.nombres AS nombres, u.apellidos AS apellidos, u.telefono, 
+            e.id_especialista, ue.nombres AS especialista_nombres, ue.apellidos AS especialista_apellidos,
+            p.fecha_nacimiento
+        FROM test_ados_2 t
+        JOIN paciente p ON t.id_paciente = p.id_paciente
+        JOIN usuario u ON p.id_usuario = u.id_usuario
+        LEFT JOIN especialista e ON t.id_especialista = e.id_especialista
+        LEFT JOIN usuario ue ON e.id_usuario = ue.id_usuario
+        WHERE t.id_ados = ?
+    `;
+    db.query(sql, [id_ados], (err, results) => {
+        if (err || results.length === 0) {
+            return res.status(500).json({ message: "No se pudo obtener datos del test" });
+        }
+        const datos = results[0];
+
+        // 2. Puntuaciones aplicadas (AS y CRR)
+        db.query(
+            `SELECT pc.puntaje, pc.id_codificacion, c.codigo
+             FROM puntuacion_aplicada pa
+             JOIN puntuacion_codificacion pc ON pa.id_puntuacion_codificacion = pc.id_puntuacion_codificacion
+             JOIN codificacion c ON pc.id_codificacion = c.id_codificacion
+             WHERE pa.id_ados = ?`,
+            [id_ados],
+            (err2, puntuaciones) => {
+                if (err2) return res.status(500).json({ message: "No se pudo obtener puntuaciones" });
+
+                // Buscar el puntaje del ítem "Nivel general de lenguaje oral no ecolálico"
+                // Ajusta el código "A1" si tu codificación es diferente
+                const puntajeA1 = puntuaciones.find(p => p.codigo === "A1")?.puntaje;
+
+                // Calcular edad en meses
+                const nacimiento = new Date(datos.fecha_nacimiento);
+                const fechaTest = new Date(datos.fecha);
+                let edadMeses = (fechaTest.getFullYear() - nacimiento.getFullYear()) * 12;
+                edadMeses += fechaTest.getMonth() - nacimiento.getMonth();
+                if (fechaTest.getDate() < nacimiento.getDate()) {
+                    edadMeses--;
+                }
+
+                // Determinar algoritmo
+                let id_algoritmo = null;
+                if (
+                    (edadMeses >= 12 && edadMeses <= 20) ||
+                    (edadMeses >= 21 && edadMeses <= 30 && (puntajeA1 === 3 || puntajeA1 === 4))
+                ) {
+                    id_algoritmo = 7;
+                } else if (
+                    (edadMeses >= 21 && edadMeses <= 30 && (puntajeA1 === 0 || puntajeA1 === 1 || puntajeA1 === 2))
+                ) {
+                    id_algoritmo = 8;
+                }
+
+                // 3. Observaciones finales
+                db.query(
+                    `SELECT ar.observacion, a.nombre_actividad
+                     FROM actividad_realizada ar
+                     JOIN actividad a ON ar.id_actividad = a.id_actividad
+                     WHERE ar.id_ados = ?`,
+                    [id_ados],
+                    (err3, observaciones) => {
+                        if (err3) return res.status(500).json({ message: "No se pudo obtener observaciones" });
+
+                        res.json({
+                            ...datos,
+                            puntuaciones,
+                            observaciones,
+                            id_algoritmo // <-- lo agregas aquí
+                        });
+                    }
+                );
+            }
+        );
+    });
+};
+
+exports.obtenerDatosReporteModulo1 = (req, res) => {
+    const { id_ados } = req.params;
+
+    // 1. Datos del test, paciente y especialista, y fecha_nacimiento para calcular edad
+    const sql = `
+        SELECT 
+            t.id_ados, t.fecha, t.modulo, t.diagnostico, t.clasificacion, t.total_punto, t.puntuacion_comparativa,
+            u.nombres AS nombres, u.apellidos AS apellidos, u.telefono, 
+            e.id_especialista, ue.nombres AS especialista_nombres, ue.apellidos AS especialista_apellidos,
+            p.fecha_nacimiento
+        FROM test_ados_2 t
+        JOIN paciente p ON t.id_paciente = p.id_paciente
+        JOIN usuario u ON p.id_usuario = u.id_usuario
+        LEFT JOIN especialista e ON t.id_especialista = e.id_especialista
+        LEFT JOIN usuario ue ON e.id_usuario = ue.id_usuario
+        WHERE t.id_ados = ?
+    `;
+    db.query(sql, [id_ados], (err, results) => {
+        if (err || results.length === 0) {
+            return res.status(500).json({ message: "No se pudo obtener datos del test" });
+        }
+        const datos = results[0];
+
+        // 2. Puntuaciones aplicadas (AS y CRR)
+        db.query(
+            `SELECT pc.puntaje, pc.id_codificacion, c.codigo
+             FROM puntuacion_aplicada pa
+             JOIN puntuacion_codificacion pc ON pa.id_puntuacion_codificacion = pc.id_puntuacion_codificacion
+             JOIN codificacion c ON pc.id_codificacion = c.id_codificacion
+             WHERE pa.id_ados = ?`,
+            [id_ados],
+            (err2, puntuaciones) => {
+                if (err2) return res.status(500).json({ message: "No se pudo obtener puntuaciones" });
+
+                // Buscar el puntaje del ítem "Nivel general de lenguaje oral no ecolálico"
+                // Ajusta el código "A1" si tu codificación es diferente
+                const puntajeA1 = puntuaciones.find(p => p.codigo === "A1")?.puntaje;
+
+                // Calcular edad en meses
+                const nacimiento = new Date(datos.fecha_nacimiento);
+                const fechaTest = new Date(datos.fecha);
+                let edadMeses = (fechaTest.getFullYear() - nacimiento.getFullYear()) * 12;
+                edadMeses += fechaTest.getMonth() - nacimiento.getMonth();
+                if (fechaTest.getDate() < nacimiento.getDate()) {
+                    edadMeses--;
+                }
+
+                // Determinar algoritmo
+                let id_algoritmo = null;
+                if (
+                    (edadMeses >= 12 && edadMeses <= 20) ||
+                    (edadMeses >= 21 && edadMeses <= 30 && (puntajeA1 === 3 || puntajeA1 === 4))
+                ) {
+                    id_algoritmo = 1;
+                } else if (
+                    (edadMeses >= 21 && edadMeses <= 30 && (puntajeA1 === 0 || puntajeA1 === 1 || puntajeA1 === 2))
+                ) {
+                    id_algoritmo = 2;
+                }
+
+                // 3. Observaciones finales
+                db.query(
+                    `SELECT ar.observacion, a.nombre_actividad
+                     FROM actividad_realizada ar
+                     JOIN actividad a ON ar.id_actividad = a.id_actividad
+                     WHERE ar.id_ados = ?`,
+                    [id_ados],
+                    (err3, observaciones) => {
+                        if (err3) return res.status(500).json({ message: "No se pudo obtener observaciones" });
+
+                        res.json({
+                            ...datos,
+                            puntuaciones,
+                            observaciones,
+                            id_algoritmo // <-- lo agregas aquí
+                        });
+                    }
+                );
+            }
+        );
+    });
+};
+
+
+
+exports.obtenerDatosReporteModulo3 = (req, res) => {
+    const { id_ados } = req.params;
+
+    // 1. Datos del test, paciente y especialista, y fecha_nacimiento para calcular edad
+    const sql = `
+        SELECT 
+            t.id_ados, t.fecha, t.modulo, t.diagnostico, t.clasificacion, t.total_punto, t.puntuacion_comparativa,
+            u.nombres AS nombres, u.apellidos AS apellidos, u.telefono, 
+            e.id_especialista, ue.nombres AS especialista_nombres, ue.apellidos AS especialista_apellidos,
+            p.fecha_nacimiento
+        FROM test_ados_2 t
+        JOIN paciente p ON t.id_paciente = p.id_paciente
+        JOIN usuario u ON p.id_usuario = u.id_usuario
+        LEFT JOIN especialista e ON t.id_especialista = e.id_especialista
+        LEFT JOIN usuario ue ON e.id_usuario = ue.id_usuario
+        WHERE t.id_ados = ?
+    `;
+    db.query(sql, [id_ados], (err, results) => {
+        if (err || results.length === 0) {
+            return res.status(500).json({ message: "No se pudo obtener datos del test" });
+        }
+        const datos = results[0];
+
+        // 2. Puntuaciones aplicadas (AS y CRR)
+        db.query(
+            `SELECT pc.puntaje, pc.id_codificacion, c.codigo
+             FROM puntuacion_aplicada pa
+             JOIN puntuacion_codificacion pc ON pa.id_puntuacion_codificacion = pc.id_puntuacion_codificacion
+             JOIN codificacion c ON pc.id_codificacion = c.id_codificacion
+             WHERE pa.id_ados = ?`,
+            [id_ados],
+            (err2, puntuaciones) => {
+                if (err2) return res.status(500).json({ message: "No se pudo obtener puntuaciones" });
+
+                // Calcular edad en años
+                const nacimiento = new Date(datos.fecha_nacimiento);
+                const fechaTest = new Date(datos.fecha);
+                let edad = fechaTest.getFullYear() - nacimiento.getFullYear();
+                const m = fechaTest.getMonth() - nacimiento.getMonth();
+                if (m < 0 || (m === 0 && fechaTest.getDate() < nacimiento.getDate())) {
+                    edad--;
+                }
+
+                // Determinar algoritmo (para módulo 3 es fijo)
+                const id_algoritmo = 5;
+
+                // 3. Observaciones finales
+                db.query(
+                    `SELECT ar.observacion, a.nombre_actividad
+                     FROM actividad_realizada ar
+                     JOIN actividad a ON ar.id_actividad = a.id_actividad
+                     WHERE ar.id_ados = ?`,
+                    [id_ados],
+                    (err3, observaciones) => {
+                        if (err3) return res.status(500).json({ message: "No se pudo obtener observaciones" });
+
+                        res.json({
+                            ...datos,
+                            puntuaciones,
+                            observaciones,
+                            id_algoritmo // <-- lo agregas aquí
+                        });
+                    }
+                );
+            }
+        );
+    });
+};
+
+exports.obtenerDatosReporteModulo2 = (req, res) => {
+    const { id_ados } = req.params;
+
+    // 1. Datos del test, paciente y especialista, y fecha_nacimiento para calcular edad
+    const sql = `
+        SELECT 
+            t.id_ados, t.fecha, t.modulo, t.diagnostico, t.clasificacion, t.total_punto, t.puntuacion_comparativa,
+            u.nombres AS nombres, u.apellidos AS apellidos, u.telefono, 
+            e.id_especialista, ue.nombres AS especialista_nombres, ue.apellidos AS especialista_apellidos,
+            p.fecha_nacimiento
+        FROM test_ados_2 t
+        JOIN paciente p ON t.id_paciente = p.id_paciente
+        JOIN usuario u ON p.id_usuario = u.id_usuario
+        LEFT JOIN especialista e ON t.id_especialista = e.id_especialista
+        LEFT JOIN usuario ue ON e.id_usuario = ue.id_usuario
+        WHERE t.id_ados = ?
+    `;
+    db.query(sql, [id_ados], (err, results) => {
+        if (err || results.length === 0) {
+            return res.status(500).json({ message: "No se pudo obtener datos del test" });
+        }
+        const datos = results[0];
+
+        // 2. Puntuaciones aplicadas (AS y CRR)
+        db.query(
+            `SELECT pc.puntaje, pc.id_codificacion, c.codigo
+             FROM puntuacion_aplicada pa
+             JOIN puntuacion_codificacion pc ON pa.id_puntuacion_codificacion = pc.id_puntuacion_codificacion
+             JOIN codificacion c ON pc.id_codificacion = c.id_codificacion
+             WHERE pa.id_ados = ?`,
+            [id_ados],
+            (err2, puntuaciones) => {
+                if (err2) return res.status(500).json({ message: "No se pudo obtener puntuaciones" });
+
+                // Calcular edad en años
+                const nacimiento = new Date(datos.fecha_nacimiento);
+                const fechaTest = new Date(datos.fecha);
+                let edad = fechaTest.getFullYear() - nacimiento.getFullYear();
+                const m = fechaTest.getMonth() - nacimiento.getMonth();
+                if (m < 0 || (m === 0 && fechaTest.getDate() < nacimiento.getDate())) {
+                    edad--;
+                }
+
+                // Determinar algoritmo para módulo 2
+                let id_algoritmo = null;
+                if (edad < 5) id_algoritmo = 3;
+                else if (edad >= 5) id_algoritmo = 4;
+
+                // 3. Observaciones finales
+                db.query(
+                    `SELECT ar.observacion, a.nombre_actividad
+                     FROM actividad_realizada ar
+                     JOIN actividad a ON ar.id_actividad = a.id_actividad
+                     WHERE ar.id_ados = ?`,
+                    [id_ados],
+                    (err3, observaciones) => {
+                        if (err3) return res.status(500).json({ message: "No se pudo obtener observaciones" });
+
+                        res.json({
+                            ...datos,
+                            puntuaciones,
+                            observaciones,
+                            id_algoritmo // <-- lo agregas aquí
+                        });
+                    }
+                );
+            }
+        );
+    });
+};
+
+exports.obtenerDatosReporteModulo4 = (req, res) => {
+    const { id_ados } = req.params;
+
+    // 1. Datos del test, paciente y especialista, y fecha_nacimiento para calcular edad
+    const sql = `
+        SELECT 
+            t.id_ados, t.fecha, t.modulo, t.diagnostico, t.clasificacion, t.total_punto, t.puntuacion_comparativa,
+            u.nombres AS nombres, u.apellidos AS apellidos, u.telefono, 
+            e.id_especialista, ue.nombres AS especialista_nombres, ue.apellidos AS especialista_apellidos,
+            p.fecha_nacimiento
+        FROM test_ados_2 t
+        JOIN paciente p ON t.id_paciente = p.id_paciente
+        JOIN usuario u ON p.id_usuario = u.id_usuario
+        LEFT JOIN especialista e ON t.id_especialista = e.id_especialista
+        LEFT JOIN usuario ue ON e.id_usuario = ue.id_usuario
+        WHERE t.id_ados = ?
+    `;
+    db.query(sql, [id_ados], (err, results) => {
+        if (err || results.length === 0) {
+            return res.status(500).json({ message: "No se pudo obtener datos del test" });
+        }
+        const datos = results[0];
+
+        // 2. Puntuaciones aplicadas
+        db.query(
+            `SELECT pc.puntaje, pc.id_codificacion, c.codigo
+             FROM puntuacion_aplicada pa
+             JOIN puntuacion_codificacion pc ON pa.id_puntuacion_codificacion = pc.id_puntuacion_codificacion
+             JOIN codificacion c ON pc.id_codificacion = c.id_codificacion
+             WHERE pa.id_ados = ?`,
+            [id_ados],
+            (err2, puntuaciones) => {
+                if (err2) return res.status(500).json({ message: "No se pudo obtener puntuaciones" });
+
+                // Algoritmo para módulo 4 es fijo
+                const id_algoritmo = 6;
+
+                // 3. Observaciones finales
+                db.query(
+                    `SELECT ar.observacion, a.nombre_actividad
+                     FROM actividad_realizada ar
+                     JOIN actividad a ON ar.id_actividad = a.id_actividad
+                     WHERE ar.id_ados = ?`,
+                    [id_ados],
+                    (err3, observaciones) => {
+                        if (err3) return res.status(500).json({ message: "No se pudo obtener observaciones" });
+
+                        res.json({
+                            ...datos,
+                            puntuaciones,
+                            observaciones,
+                            id_algoritmo
+                        });
+                    }
+                );
+            }
+        );
     });
 };
