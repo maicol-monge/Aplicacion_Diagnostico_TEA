@@ -21,16 +21,21 @@ export default function ReporteModuleT() {
   const senalar = 0;
   const gestos = 0;
   const contactoVisual = 0;
+  const contactoVisual2 = 0;           // <-- Agrega esta línea
   const expresionesFaciales = 0;
+  const expresionesFaciales2 = 0;      // <-- Agrega esta línea
   const integracionMirada = 0;
+  const integracionMirada2 = 0;        // <-- Agrega esta línea
   const disfruteCompartido = 0;
   const respuestaNombre = 0;
   const ignorar = 0;
   const pedir = 0;
   const mostrar = 0;
   const iniciacionEspontanea = 0;
+  const iniciacionEspontanea2 = 0;     // <-- Agrega esta línea
   const respuestaAtencion = 0;
   const caracteristicasIniciaciones = 0;
+  const caracteristicasIniciaciones2 = 0; // <-- Agrega esta línea
   const cantidadIniciaciones = 0;
   const calidadRelacion = 0;
   const totalAS = 0;
@@ -39,8 +44,11 @@ export default function ReporteModuleT() {
   // Comportamiento Restringido y Repetitivo (CRR)
   const entonacion = 0;
   const interesSensorial = 0;
+  const interesSensorial2 = 0;         // <-- Agrega esta línea
   const movimientosManos = 0;
+  const movimientosManos2 = 0;         // <-- Agrega esta línea
   const interesesRepetitivos = 0;
+  const interesesRepetitivos2 = 0;     // <-- Agrega esta línea
   const totalCRR = 0;
   const totalCRR2 = 0;
 
@@ -81,7 +89,7 @@ export default function ReporteModuleT() {
       </div>
 
       {/* Plantilla completa oculta */}
-      <div>
+      <div style={{ display: "none" }}>
         <div ref={reportRef} className="bg-white p-4">
           {/* ENCABEZADO DEL REPORTE */}
           <div className="row mb-4">
@@ -187,7 +195,7 @@ export default function ReporteModuleT() {
                 <span className="float-end">(B-1)</span>
               </div>
               <div className="col-md-2 border rounded p-1">{contactoVisual}</div>
-              <div className="col-md-2 border rounded p-1">{expresionesFaciales}</div>
+              <div className="col-md-2 border rounded p-1">{contactoVisual2}</div>
             </div>
             <div className="row g-2 mb-2">
               <div className="col-md-8">
@@ -195,7 +203,7 @@ export default function ReporteModuleT() {
                 <span className="float-end">(B-4)</span>
               </div>
               <div className="col-md-2 border rounded p-1">{expresionesFaciales}</div>
-              <div className="col-md-2 border rounded p-1">{integracionMirada}</div>
+              <div className="col-md-2 border rounded p-1">{expresionesFaciales2}</div>
             </div>
             <div className="row g-2 mb-2">
               <div className="col-md-8">
@@ -203,7 +211,7 @@ export default function ReporteModuleT() {
                 <span className="float-end">(B-5)</span>
               </div>
               <div className="col-md-2 border rounded p-1">{integracionMirada}</div>
-              <div className="col-md-2 border rounded p-1">{disfruteCompartido}</div>
+              <div className="col-md-2 border rounded p-1">{integracionMirada2}</div>
             </div>
             <div className="row g-2 mb-2">
               <div className="col-md-8">
@@ -251,7 +259,7 @@ export default function ReporteModuleT() {
                 <span className="float-end">(B-13)</span>
               </div>
               <div className="col-md-2 border rounded p-1">{iniciacionEspontanea}</div>
-              <div className="col-md-2 border rounded p-1">{respuestaAtencion}</div>
+              <div className="col-md-2 border rounded p-1">{iniciacionEspontanea2}</div>
             </div>
             <div className="row g-2 mb-2">
               <div className="col-md-8">
@@ -267,7 +275,7 @@ export default function ReporteModuleT() {
                 <span className="float-end">(B-15)</span>
               </div>
               <div className="col-md-2 border rounded p-1">{caracteristicasIniciaciones}</div>
-              <div className="col-md-2 border rounded p-1">{cantidadIniciaciones}</div>
+              <div className="col-md-2 border rounded p-1">{caracteristicasIniciaciones2}</div>
             </div>
             <div className="row g-2 mb-4">
               <div className="col-md-8">
@@ -316,7 +324,7 @@ export default function ReporteModuleT() {
                 <span className="float-end">(D-1)</span>
               </div>
               <div className="col-md-2 border rounded p-1">{interesSensorial}</div>
-              <div className="col-md-2 border rounded p-1">{movimientosManos}</div>
+              <div className="col-md-2 border rounded p-1">{interesSensorial2}</div>
             </div>
             <div className="row g-2 mb-2">
               <div className="col-md-8">
@@ -324,7 +332,7 @@ export default function ReporteModuleT() {
                 <span className="float-end">(D-2)</span>
               </div>
               <div className="col-md-2 border rounded p-1">{movimientosManos}</div>
-              <div className="col-md-2 border rounded p-1">{interesesRepetitivos}</div>
+              <div className="col-md-2 border rounded p-1">{movimientosManos2}</div>
             </div>
             <div className="row g-2 mb-2">
               <div className="col-md-8">
@@ -332,7 +340,8 @@ export default function ReporteModuleT() {
                 <span className="float-end">(D-5)</span>
               </div>
               <div className="col-md-2 border rounded p-1">{interesesRepetitivos}</div>
-              <div className="col-md-2"></div>
+            <div className="col-md-2 border rounded p-1">{interesesRepetitivos2}</div>
+
             </div>
           </fieldset>
 
@@ -343,7 +352,7 @@ export default function ReporteModuleT() {
               <div className="row row g-2 mb-2">
                 <div className="col-md-8 text-end fw-bold text-white">TOTAL CRR:</div>
                 <div className="col-md-2 border rounded p-1 text-white">{totalCRR}</div>
-                <div className="col-md-2 border rounded p-1 text-white">{totalCRR}</div>
+                <div className="col-md-2 border rounded p-1 text-white">{totalCRR2}</div>
               </div>
             </fieldset>
 
@@ -354,7 +363,7 @@ export default function ReporteModuleT() {
               <div className="row g-2 mb-2">
                 <div className="col-md-8 text-end fw-bold text-white">PUNTUACIÓN TOTAL GLOBAL (AS + CRR):</div>
                 <div className="col-md-2 border rounded p-1 text-white">{totalGlobal}</div>
-                <div className="col-md-2 border rounded p-1 text-white">{totalGlobal}</div>
+                <div className="col-md-2 border rounded p-1 text-white">{totalGlobal2}</div>
               </div>
             </fieldset>
 
