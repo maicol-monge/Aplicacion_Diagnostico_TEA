@@ -469,7 +469,7 @@ exports.obtenerPreguntasConRespuestas = (req, res) => {
 
             // --- NUEVO: obtener datos del paciente ---
             db.query(
-                `SELECT u.nombres, u.apellidos, p.sexo, p.fecha_nacimiento
+                `SELECT p.id_paciente, u.nombres, u.apellidos, p.sexo, p.fecha_nacimiento
                  FROM test_adi_r t
                  JOIN paciente p ON t.id_paciente = p.id_paciente
                  JOIN usuario u ON p.id_usuario = u.id_usuario

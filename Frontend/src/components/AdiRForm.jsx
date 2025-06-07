@@ -545,7 +545,7 @@ const AdiRForm = ({
                 text: "Diagnóstico final guardado correctamente.",
                 confirmButtonColor: COLOR_ACCENT
             });
-            navigate(`/pacientes`);
+            navigate(`/tests-paciente/${datosPaciente.id_paciente}`);
         } catch (err) {
             Swal.fire({
                 icon: "error",

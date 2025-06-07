@@ -355,13 +355,13 @@ const ResponderAdir = () => {
                                 </h5>
                                 <p style={{ fontSize: 18 }}>{pregunta.id_pregunta}. {pregunta.pregunta}</p>
                                 <div className="mb-3">
-                                    <label className="form-label fw-bold">Código</label>
+                                    <label className="form-label fw-bold">Código <span className="text-muted">(0 si no aplica)</span></label>
                                     {preguntasMeses.includes(pregunta.id_pregunta) ? (
                                         <input
                                             type="number"
                                             className="form-control"
-                                            value={codigoLocal}
-                                            onChange={e => setCodigoLocal(e.target.value)}
+                                            value={codigoLocal === "" ? "" : codigoLocal}
+                                            onChange={e => setCodigoLocal(e.target.value.replace(/^0+(?!$)/, ""))}
                                             disabled={guardando}
                                             min={0}
                                             placeholder="Cantidad de meses"
@@ -383,7 +383,7 @@ const ResponderAdir = () => {
                                     )}
                                 </div>
                                 <div className="mb-3">
-                                    <label className="form-label"><span className="fw-bold">Observación</span> (Escribir N/A si no aplica)</label>
+                                    <label className="form-label fw-bold">Observación <span className="text-muted">(Escribir N/A si no aplica)</span></label>
 
                                     <textarea
                                         className="form-control"

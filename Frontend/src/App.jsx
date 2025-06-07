@@ -37,6 +37,7 @@ import ActividadesConsulta from "./Especialista/ActividadesConsulta";
 import CrearAdir from "./Evaluacion/CrearAdir";
 import ResponderAdir from "./Evaluacion/ResponderAdir";
 import Algoritmo from "./Evaluacion/Algoritmo";
+import Reportes from "./Especialista/Reportes";
 
 
 
@@ -93,6 +94,8 @@ function App() {
 
           <Route path="/responder-adir/:id_adir" element={<ResponderAdir />} />
           <Route path="/algoritmo/:id_adir" element={<Algoritmo />} />
+
+          <Route path="/reportes" element={<Reportes />} />
 
         </Route>
         {/* Solo pacientes (privilegio 1) */}

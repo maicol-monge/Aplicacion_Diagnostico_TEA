@@ -196,3 +196,75 @@ Equipo TEA Diagnóstico
         }
     });
 }
+
+// ...existing code...
+
+// Listar todos los tests (ADI-R y ADOS-2) de un paciente, con filtros opcionales
+exports.listarResultadosPaciente = (req, res) => {
+    const { id_paciente } = req.params;
+    const { tipo, fecha_inicio, fecha_fin } = req.query;
+
+    if (!id_paciente) {
+        return res.status(400).json({ message: "El id_paciente es requerido" });
+    }
+
+    // Construir consultas según filtros
+    let consultas = [];
+
+    // Filtros de fechas
+    let filtroFechaAdiR = "";
+    let filtroFechaAdos = "";
+    if (fecha_inicio) {
+        filtroFechaAdiR += ` AND fecha >= '${fecha_inicio} 00:00:00'`;
+        filtroFechaAdos += ` AND fecha >= '${fecha_inicio} 00:00:00'`;
+    }
+    if (fecha_fin) {
+        filtroFechaAdiR += ` AND fecha <= '${fecha_fin} 23:59:59'`;
+        filtroFechaAdos += ` AND fecha <= '${fecha_fin} 23:59:59'`;
+    }
+
+    // Si no hay filtro de tipo o es ambos
+    if (!tipo || tipo === "todos") {
+        consultas.push(new Promise((resolve) => {
+            db.query(
+                `SELECT id_adir as id, fecha, diagnostico, 'ADI-R' as tipo FROM test_adi_r WHERE id_paciente = ? AND estado = 1${filtroFechaAdiR}`,
+                [id_paciente],
+                (err, rows) => resolve(rows || [])
+            );
+        }));
+        consultas.push(new Promise((resolve) => {
+            db.query(
+                `SELECT id_ados as id, fecha, diagnostico, clasificacion, modulo, 'ADOS-2' as tipo FROM test_ados_2 WHERE id_paciente = ? AND estado = 0${filtroFechaAdos}`,
+                [id_paciente],
+                (err, rows) => resolve(rows || [])
+            );
+        }));
+    } else if (tipo === "adir") {
+        consultas.push(new Promise((resolve) => {
+            db.query(
+                `SELECT id_adir as id, fecha, diagnostico, 'ADI-R' as tipo FROM test_adi_r WHERE id_paciente = ? AND estado = 1${filtroFechaAdiR}`,
+                [id_paciente],
+                (err, rows) => resolve(rows || [])
+            );
+        }));
+    } else if (tipo === "ados") {
+        consultas.push(new Promise((resolve) => {
+            db.query(
+                `SELECT id_ados as id, fecha, diagnostico, clasificacion, modulo, 'ADOS-2' as tipo FROM test_ados_2 WHERE id_paciente = ? AND estado = 0${filtroFechaAdos}`,
+                [id_paciente],
+                (err, rows) => resolve(rows || [])
+            );
+        }));
+    }
+
+    Promise.all(consultas).then(results => {
+        // Unir y ordenar por fecha descendente
+        let tests = [].concat(...results);
+        tests.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+        res.json(tests);
+    }).catch(() => {
+        res.status(500).json({ message: "Error al obtener resultados" });
+    });
+};
+
+// ...existing code...
