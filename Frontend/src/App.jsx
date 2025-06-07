@@ -44,7 +44,8 @@ import Modulo1 from "./Paciente/Modulo1";
 import Modulo2 from "./Paciente/Modulo2";
 import Modulo3 from "./Paciente/Modulo3";
 import Modulo4 from "./Paciente/Modulo4"; // <-- Agregado
-
+import ReportAdiR from "./Paciente/ReportAdiR";
+import ReportAdiR_paciente from "./Paciente/ReportAdiR_paciente";
 
 
 function App() {
@@ -114,7 +115,8 @@ function App() {
           <Route path="/modulo-2" element={<Modulo2 />} />
           <Route path="/modulo-3" element={<Modulo3 />} />
           <Route path="/modulo-4" element={<Modulo4 />} />
- {/* <-- Agregado */}
+          <Route path="/reporte-adir" element={<ReportAdiR />} /> {/* <-- Agregado */}
+          <Route path="/reporte-adir-paciente" element={<ReportAdiR_paciente />} /> {/* <-- Agregado */}
         </Route>
         {/* Solo admin (privilegio 3) */}
         <Route element={<ProtectedRoute allowedPrivileges={[3]} />}>
