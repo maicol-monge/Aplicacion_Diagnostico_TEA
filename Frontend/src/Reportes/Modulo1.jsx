@@ -145,6 +145,10 @@ export default function ReporteModulo1({ datos }) {
 
   const mostrarUnico = (valor) => valor === 0 ? "" : valor;
 
+  console.log(id_algoritmo);
+
+  console.log(puntuaciones);
+
   return (
     <div className="d-flex flex-column min-vh-100" style={{ background: COLOR_BG }}>
 
