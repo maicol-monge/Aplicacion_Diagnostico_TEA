@@ -251,7 +251,10 @@ const Reportes = () => {
                                         <div className="alert alert-warning">Este paciente no tiene tests registrados.</div>
                                     )}
                                     {getTestsFiltrados(paciente).map(test => (
-                                        <div key={test.id_adir || test.id_ados} className="card mb-2">
+                                        <div
+                                            key={`${test.tipo}-${test.id_adir || test.id_ados}`}
+                                            className="card mb-2"
+                                        >
                                             <div className="card-body d-flex flex-column flex-md-row justify-content-between align-items-md-center">
                                                 <div>
                                                     <span className="badge bg-info me-2">{test.tipo}</span>
@@ -324,6 +327,7 @@ const Reportes = () => {
                                     <button type="button" className="btn-close" onClick={() => setReporteM1(null)}></button>
                                 </div>
                                 <div className="modal-body">
+                                    {console.log(reporteM1)}
                                     <ReporteModulo1 datos={reporteM1} />
                                 </div>
                             </div>
@@ -375,7 +379,6 @@ const Reportes = () => {
                         </div>
                     </div>
                 )}
-                {/* Si tienes otros módulos, agrega sus modales aquí */}
             </div>
             <Footer />
         </div>

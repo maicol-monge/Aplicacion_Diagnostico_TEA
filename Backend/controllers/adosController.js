@@ -654,7 +654,8 @@ exports.obtenerDatosReporteModulo1 = (req, res) => {
 
                 // Buscar el puntaje del ítem "Nivel general de lenguaje oral no ecolálico"
                 // Ajusta el código "A1" si tu codificación es diferente
-                const puntajeA1 = puntuaciones.find(p => p.codigo === "A1")?.puntaje;
+                const puntajeA1 = Number(puntuaciones.find(p => p.codigo === "A1")?.puntaje);
+                console.log("puntajeA1:", puntajeA1);
 
                 // Calcular edad en meses
                 const nacimiento = new Date(datos.fecha_nacimiento);
@@ -665,15 +666,16 @@ exports.obtenerDatosReporteModulo1 = (req, res) => {
                     edadMeses--;
                 }
 
+                console.log(edadMeses, puntajeA1);
+
                 // Determinar algoritmo
                 let id_algoritmo = null;
                 if (
-                    (edadMeses >= 12 && edadMeses <= 20) ||
-                    (edadMeses >= 21 && edadMeses <= 30 && (puntajeA1 === 3 || puntajeA1 === 4))
+                    puntajeA1 === 3 || puntajeA1 === 4
                 ) {
                     id_algoritmo = 1;
                 } else if (
-                    (edadMeses >= 21 && edadMeses <= 30 && (puntajeA1 === 0 || puntajeA1 === 1 || puntajeA1 === 2))
+                    puntajeA1 === 0 || puntajeA1 === 1 || puntajeA1 === 2
                 ) {
                     id_algoritmo = 2;
                 }
@@ -692,8 +694,10 @@ exports.obtenerDatosReporteModulo1 = (req, res) => {
                             ...datos,
                             puntuaciones,
                             observaciones,
-                            id_algoritmo // <-- lo agregas aquí
+                            id_algoritmo
                         });
+
+                        console.log(id_algoritmo);
                     }
                 );
             }
